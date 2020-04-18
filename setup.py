@@ -1,33 +1,25 @@
-import pathlib
-from setuptools import setup
+import setuptools
 
-# The directory containing this file
-HERE = pathlib.Path(__file__).parent
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
-# The text of the README file
-README = (HERE / "README.md").read_text()
-
-# This call to setup() does all the work
-setup(
+setuptools.setup(
     name="AirzoneCloud",
-    version="0.1.0",
-    description="Access to AirzoneCloud API",
-    long_description=README,
-    long_description_content_type="text/markdown",
-    url="https://github.com/max13fr/airzonecloud",
+    version="0.0.1",
     author="max13fr",
     author_email="max13fr@yozo.fr",
-    license="MIT",
-    classifiers=[
-        "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-    ],
+    description="Python3 library for Airzone Cloud API",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/max13fr/AirzoneCloud",
+    keywords=["airzone", "airzonecloud", "api"]
     packages=["AirzoneCloud"],
-    include_package_data=True,
     install_requires=["requests"],
-    entry_points={},
+    classifiers=[
+        "Development Status :: 3 - Alpha",      # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+    ],
+    python_requires=">=3.5",
 )

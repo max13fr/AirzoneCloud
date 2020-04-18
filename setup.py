@@ -9,13 +9,13 @@ README = (HERE / "README.md").read_text()
 
 # This call to setup() does all the work
 setup(
-    name="airzonecloud",
+    name="AirzoneCloud",
     version="0.1.0",
     description="Access to AirzoneCloud API",
     long_description=README,
     long_description_content_type="text/markdown",
     url="https://github.com/max13fr/airzonecloud",
-    author="Sylvain Feuerstoss",
+    author="max13fr",
     author_email="max13fr@yozo.fr",
     license="MIT",
     classifiers=[
@@ -26,7 +26,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
     ],
-    packages=["airzonecloud"],
+    packages=["AirzoneCloud"],
     include_package_data=True,
     install_requires=["requests"],
     entry_points={},

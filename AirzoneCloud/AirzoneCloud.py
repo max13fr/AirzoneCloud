@@ -6,8 +6,6 @@ import urllib
 import urllib.parse
 import json
 
-from .zone import Zone
-from .device import Device
 from .contants import (
     BASE_URL,
     API_LOGIN,
@@ -18,6 +16,7 @@ from .contants import (
     BASIC_REQUEST_HEADERS,
     XHR_REQUEST_HEADERS,
 )
+from .Device import Device
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -70,9 +69,10 @@ class AirzoneCloud:
             response = self._session.post(
                 url, headers=BASIC_REQUEST_HEADERS, json=login_payload
             ).json()
+            print(response)
             self._token = response.get("user").get("authentication_token")
-        except RuntimeError:
-            raise Exception("Unable to login to AirzoneCloud")
+        except (RuntimeError, AttributeError):
+            raise Exception("Unable to login to AirzoneCloud") from None
 
         _LOGGER.info("Login success as {}".format(self._username))
 

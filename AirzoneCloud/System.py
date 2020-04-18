@@ -1,5 +1,5 @@
 import logging
-from .zone import Zone
+from .Zone import Zone
 
 _LOGGER = logging.getLogger(__name__)
 

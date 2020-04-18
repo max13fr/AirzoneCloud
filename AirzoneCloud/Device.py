@@ -1,5 +1,5 @@
 import logging
-from .system import System
+from .System import System
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -65,7 +65,7 @@ class AirzoneCloud:
     #
 
     def refresh_devices(self):
-        """ Refresh devices """
+        """Refresh devices"""
         self._load_devices()
 
     #
@@ -113,21 +113,22 @@ class AirzoneCloud:
         return self._devices
 
     def _get_device_relations(self):
-        """Get devices"""
+        """Http GET to load devices"""
         _LOGGER.debug("get_device_relations()")
         return self._get(API_DEVICE_RELATIONS).get("device_relations")
 
     def _get_systems(self, device_id):
-        """Get systems"""
+        """Http GET to load systems"""
         _LOGGER.debug("get_systems(device_id={})".format(device_id))
         return self._get(API_SYSTEMS, {"device_id": device_id}).get("systems")
 
     def _get_zones(self, system_id):
-        """Get Zones."""
+        """Http GET to load Zones"""
         _LOGGER.debug("get_zones(system_id={})".format(system_id))
         return self._get(API_ZONES, {"system_id": system_id}).get("zones")
 
     def _send_event(self, payload):
+        """Http POST to send an event"""
         _LOGGER.debug("Send event with payload: {}".format(json.dumps(payload)))
         try:
             result = self._post(API_EVENTS, payload)

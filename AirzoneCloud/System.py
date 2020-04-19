@@ -1,5 +1,10 @@
 import logging
-from .contants import MODES_CONVERTER
+from .contants import (
+    MODES_CONVERTER,
+    ECO_CONVERTER,
+    VELOCITIES_CONVERTER,
+    AIRFLOW_CONVERTER,
+)
 from .Zone import Zone
 
 _LOGGER = logging.getLogger(__name__)
@@ -19,38 +24,141 @@ class System:
         self._data = data
 
         # log
-        _LOGGER.info(
-            "Init system '{}' (id={}, system_number={}, device_id={})".format(
-                self.name, self.id, self.system_number, self.device_id
-            )
-        )
+        _LOGGER.info("Init {}".format(self.str_complete))
         _LOGGER.debug(data)
 
         # load zones
         self._load_zones()
 
     def __str__(self):
-        return 'System("{}")'.format(self.name)
+        return "System(name={}, mode={}, eco={}, velocity={}, airflow={})".format(
+            self.name, self.mode, self.eco, self.velocity, self.airflow,
+        )
+
+    @property
+    def str_complete(self):
+        return "System(name={}, mode={}, eco={}, velocity={}, airflow={}, id={}, system_number={}, device_id={})".format(
+            self.name,
+            self.mode,
+            self.eco,
+            self.velocity,
+            self.airflow,
+            self.id,
+            self.system_number,
+            self.device_id,
+        )
 
     #
     # getters
     #
 
     @property
+    def name(self):
+        return self._data.get("name")
+
+    @property
+    def mode(self):
+        if self.mode_raw is None:
+            return None
+        return MODES_CONVERTER[self.mode_raw]["name"]
+
+    @property
+    def mode_description(self):
+        if self.mode_raw is None:
+            return None
+        return MODES_CONVERTER[self.mode_raw]["description"]
+
+    @property
+    def mode_raw(self):
+        return self._data.get("mode")
+
+    @property
+    def eco(self):
+        if self.eco_raw is None:
+            return None
+        return ECO_CONVERTER[self.eco_raw]["name"]
+
+    @property
+    def eco_description(self):
+        if self.eco_raw is None:
+            return None
+        return ECO_CONVERTER[self.eco_raw]["description"]
+
+    @property
+    def eco_raw(self):
+        return self._data.get("eco")
+
+    @property
+    def has_velocity(self):
+        return self._data.get("has_velocity")
+
+    @property
+    def velocity(self):
+        if self.velocity_raw is None:
+            return None
+        return VELOCITIES_CONVERTER[self.velocity_raw]["name"]
+
+    @property
+    def velocity_description(self):
+        if self.velocity_raw is None:
+            return None
+        return VELOCITIES_CONVERTER[self.velocity_raw]["description"]
+
+    @property
+    def velocity_raw(self):
+        return self._data.get("velocity")
+
+    @property
+    def has_airflow(self):
+        return self._data.get("has_air_flow")
+
+    @property
+    def airflow(self):
+        if self.airflow_raw is None:
+            return None
+        return AIRFLOW_CONVERTER[self.airflow_raw]["name"]
+
+    @property
+    def airflow_description(self):
+        if self.airflow_raw is None:
+            return None
+        return AIRFLOW_CONVERTER[self.airflow_raw]["description"]
+
+    @property
+    def airflow_raw(self):
+        return self._data.get("air_flow")
+
+    @property
+    def max_temp(self):
+        if self._data.get("max_limit") is not None:
+            return float(self._data.get("max_limit"))
+        return None
+
+    @property
+    def min_temp(self):
+        if self._data.get("min_limit") is not None:
+            return float(self._data.get("min_limit"))
+        return None
+
+    @property
     def id(self):
         return self._data.get("id")
 
     @property
-    def name(self):
-        return self._data.get("name")
+    def device_id(self):
+        return self._data.get("device_id")
 
     @property
     def system_number(self):
         return self._data.get("system_number")
 
     @property
-    def device_id(self):
-        return self._data.get("device_id")
+    def firmware_ws(self):
+        return self._data.get("firm_ws")
+
+    @property
+    def firmware_system(self):
+        return self._data.get("system_fw")
 
     #
     # setters

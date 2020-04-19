@@ -1,11 +1,11 @@
-# 2020-04-18: extracted from https://airzonecloud.com/assets/application-506494af86e686bf472b872d02048b42.js
-
 BASE_URL = "https://www.airzonecloud.com"
 API_LOGIN = "/users/sign_in"
 API_DEVICE_RELATIONS = "/device_relations"
 API_SYSTEMS = "/systems"
 API_ZONES = "/zones"
 API_EVENTS = "/events"
+
+# 2020-04-18: extracted from https://airzonecloud.com/assets/application-506494af86e686bf472b872d02048b42.js
 
 MODES_CONVERTER = {
     "0": {"name": "stop", "description": "Stop"},

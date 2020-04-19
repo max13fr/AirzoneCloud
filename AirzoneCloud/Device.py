@@ -16,14 +16,20 @@ class Device:
         self._data = data
 
         # log
-        _LOGGER.info("Init device '{}' (id={})".format(self.name, self.id))
+        _LOGGER.info("Init {}".format(self.str_complete))
         _LOGGER.debug(data)
 
         # load all systems
         self._load_systems()
 
     def __str__(self):
-        return 'Device("{}")'.format(self.name)
+        return "Device(name={}, status={})".format(self.name, self.status)
+
+    @property
+    def str_complete(self):
+        return "Device(name={}, status={}, id={}, mac={})".format(
+            self.name, self.status, self.id, self.mac,
+        )
 
     #
     # getters
@@ -40,9 +46,55 @@ class Device:
         return self._data.get("name")
 
     @property
+    def status(self):
+        """ Return device status """
+        return self._data.get("status")
+
+    @property
     def location(self):
         """ Return device location """
         return self._data.get("complete_name")
+
+    @property
+    def mac(self):
+        """ Return device mac """
+        return self._data.get("mac")
+
+    @property
+    def pin(self):
+        """ Return device pin code """
+        return self._data.get("pin")
+
+    @property
+    def target_temperature(self):
+        """ Return device target temperature """
+        return self._data.get("consign")
+
+    @property
+    def firmware_ws(self):
+        """ Return webserver device """
+        return self._data.get("firm_ws")
+
+    @property
+    def has_eco(self):
+        return self._data.get("has_eco")
+
+    @property
+    def has_velocity(self):
+        return self._data.get("has_velocity")
+
+    @property
+    def has_airflow(self):
+        return self._data.get("has_air_flow")
+
+    @property
+    def has_farenheit(self):
+        return self._data.get("has_harenheit")
+
+    @property
+    def sync_datetime(self):
+        """ Return True if device datetime is sync with AirzoneCloud """
+        return self._data.get("sync_datetime")
 
     #
     # children

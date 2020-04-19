@@ -4,3 +4,4 @@ __pycache__/
 TODROP.py
 dist/
 AirzoneCloud.egg-info/
+Sphinx-docs

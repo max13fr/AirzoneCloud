@@ -14,6 +14,7 @@
     - [HVAC mode](#hvac-mode)
       - [Available modes](#available-modes)
       - [Set HVAC mode on a system (and its sub-zones)](#set-hvac-mode-on-a-system-and-its-sub-zones)
+  - [API doc](#api-doc)
 
 ## Presentation
 
@@ -159,3 +160,7 @@ Output :
 System(name=Home, mode=stop, eco=eco-a, velocity=None, airflow=None)
 System(name=Home, mode=heat-both, eco=eco-a, velocity=None, airflow=None)
 </pre>
+
+## API doc
+
+[API full doc](blob/master/API.md)

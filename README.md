@@ -163,4 +163,4 @@ System(name=Home, mode=heat-both, eco=eco-a, velocity=None, airflow=None)
 
 ## API doc
 
-[API full doc](blob/master/API.md)
+[API full doc](API.md)

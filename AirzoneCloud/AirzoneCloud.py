@@ -13,8 +13,6 @@ from .contants import (
     API_SYSTEMS,
     API_ZONES,
     API_EVENTS,
-    BASIC_REQUEST_HEADERS,
-    XHR_REQUEST_HEADERS,
 )
 from .Device import Device
 
@@ -24,14 +22,20 @@ _LOGGER = logging.getLogger(__name__)
 class AirzoneCloud:
     """Allow to connect to AirzoneCloud API"""
 
+    _session = None
+    _username = None
+    _password = None
+    _user_agent = "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 7 Build/MOB30X; wv) AppleWebKit/537.26 (KHTML, like Gecko) Version/4.0 Chrome/70.0.3538.110 Safari/537.36"
     _token = None
     _devices = []
 
-    def __init__(self, username, password):
+    def __init__(self, username, password, user_agent=None):
         """Initialize API connection"""
         self._session = requests.Session()
         self._username = username
         self._password = password
+        if user_agent is not None and isinstance(user_agent, str):
+            self._user_agent = user_agent
         # login
         self._login(username, password)
         # load devices
@@ -66,10 +70,10 @@ class AirzoneCloud:
         try:
             url = "{}{}".format(BASE_URL, API_LOGIN)
             login_payload = {"email": username, "password": password}
+            headers = {"User-Agent": self._user_agent}
             response = self._session.post(
-                url, headers=BASIC_REQUEST_HEADERS, json=login_payload
+                url, headers=headers, json=login_payload
             ).json()
-            print(response)
             self._token = response.get("user").get("authentication_token")
         except (RuntimeError, AttributeError):
             raise Exception("Unable to login to AirzoneCloud") from None
@@ -106,9 +110,10 @@ class AirzoneCloud:
         return self._get(API_ZONES, {"system_id": system_id}).get("zones")
 
     def _send_event(self, payload):
-        _LOGGER.info("Send event with payload: {}".format(json.dumps(payload)))
+        _LOGGER.debug("Send event with payload: {}".format(json.dumps(payload)))
         try:
             result = self._post(API_EVENTS, payload)
+            _LOGGER.debug("Result event: {}".format(json.dumps(result)))
             return result  # XXX manage error ?
         except RuntimeError:
             _LOGGER.error("Unable to send event to AirzoneCloud")
@@ -120,7 +125,8 @@ class AirzoneCloud:
         params["user_email"] = self._username
         params["user_token"] = self._token
         url = "{}{}/?{}".format(BASE_URL, api_endpoint, urllib.parse.urlencode(params))
-        return self._session.get(url, headers=BASIC_REQUEST_HEADERS).json()
+        headers = {"User-Agent": self._user_agent}
+        return self._session.get(url, headers=headers).json()
 
     def _post(self, api_endpoint, payload={}):
         """Do a http POST request on an api endpoint"""
@@ -131,4 +137,10 @@ class AirzoneCloud:
         url = "{}{}/?{}".format(
             BASE_URL, api_endpoint, urllib.parse.urlencode(uri_params)
         )
-        return self._session.post(url, headers=XHR_REQUEST_HEADERS, json=payload).json()
+        headers = {
+            "User-Agent": self._user_agent,
+            "X-Requested-With": "XMLHttpRequest",
+            "Content-Type": "application/json;charset=UTF-8",
+            "Accept": "application/json, text/plain, */*",
+        }
+        return self._session.post(url, headers=headers, json=payload).json()

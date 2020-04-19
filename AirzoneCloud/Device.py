@@ -61,10 +61,10 @@ class Device:
         self._systems = []
         try:
             for system in self._api._get_systems(self.id):
-                self._systems.append(System(self._api, system))
+                self._systems.append(System(self._api, self, system))
         except RuntimeError:
             raise Exception(
-                "Unable to load systems of device {} (%) from AirzoneCloud".format(
+                "Unable to load systems of device {} ({}) from AirzoneCloud".format(
                     self.name, self.id
                 )
             )

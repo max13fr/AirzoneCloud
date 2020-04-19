@@ -7,25 +7,36 @@ _LOGGER = logging.getLogger(__name__)
 class Zone:
     """Manage a Airzonecloud zone"""
 
-    def __init__(self, api, data):
+    def __init__(self, api, system, data):
         self._api = api
+        self._system = system
         self._data = data
 
-        _LOGGER.info(
-            "Init zone '{}' (id={}, system_number={}, zone_number={}, current_temperature={} target_temperature={})".format(
-                self.name,
-                self.id,
-                self.system_number,
-                self.zone_number,
-                self.current_temperature,
-                self.target_temperature,
-            )
-        )
-
+        # log
+        _LOGGER.info("Init {}".format(self.str_complete))
         _LOGGER.debug(data)
 
     def __str__(self):
-        return 'Zone("{}")'.format(self.name)
+        return "Zone(name={}, is_on={}, mode={}, current_temp={}, target_temp={})".format(
+            self.name,
+            self.is_on,
+            self.mode_name,
+            self.current_temperature,
+            self.target_temperature,
+        )
+
+    @property
+    def str_complete(self):
+        return "Zone(name={}, id={}, system_number={}, zone_number={}, is_on={}, mode={}, current_temperature={} target_temperature={})".format(
+            self.name,
+            self.id,
+            self.system_number,
+            self.zone_number,
+            self.is_on,
+            self.mode_name,
+            self.current_temperature,
+            self.target_temperature,
+        )
 
     #
     # getters
@@ -102,20 +113,56 @@ class Zone:
     #
 
     def turn_on(self):
-        self._data["state"] = "1"
+        """ Turn zone on """
+        _LOGGER.info("call turn_on() on {}".format(self.str_complete))
         self._send_event("state", 1)
+        self._data["state"] = "1"
         return True
 
     def turn_off(self):
-        self._data["state"] = "0"
+        """ Turn zone off """
+        _LOGGER.info("call turn_off() on {}".format(self.str_complete))
         self._send_event("state", 0)
+        self._data["state"] = "0"
         return True
+
+    def set_temperature(self, temperature):
+        """ Set target_temperature for this zone """
+        _LOGGER.info(
+            "call set_temperature({}) on {}".format(temperature, self.str_complete)
+        )
+        temperature = float(temperature)
+        if self.min_temp is not None and temperature < self.min_temp:
+            temperature = self.min_temp
+        if self.max_temp is not None and temperature > self.max_temp:
+            temperature = self.max_temp
+        self._send_event("consign", temperature)
+        self._data["consign"] = str(temperature)
+        return True
+
+    #
+    # parent system
+    #
+
+    @property
+    def system(self):
+        """ Get parent system """
+        return self._system
+
+    #
+    # Refresh zone data
+    #
+
+    def refresh(self):
+        """ Refresh current zone data (call refresh_zones on parent system) """
+        self.system.refresh_zones()
 
     #
     # private
     #
 
     def _send_event(self, option, value):
+        """ Send an event for current zone """
         payload = {
             "event": {
                 "cgi": "modzona",
@@ -127,6 +174,11 @@ class Zone:
             }
         }
         return self._api._send_event(payload)
+
+    def _set_data_refreshed(self, data):
+        """ Set data refreshed (call by parent system on refresh_zones()) """
+        self._data = data
+        _LOGGER.info("Data refreshed for {}".format(self.str_complete))
 
 
 #

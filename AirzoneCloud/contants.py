@@ -7,17 +7,6 @@ API_SYSTEMS = "/systems"
 API_ZONES = "/zones"
 API_EVENTS = "/events"
 
-USER_AGENT = "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 7 Build/MOB30X; wv) AppleWebKit/537.26 (KHTML, like Gecko) Version/4.0 Chrome/70.0.3538.110 Safari/537.36"
-BASIC_REQUEST_HEADERS = {
-    "User-Agent": USER_AGENT,
-}
-XHR_REQUEST_HEADERS = {
-    "User-Agent": USER_AGENT,
-    "X-Requested-With": "XMLHttpRequest",
-    "Content-Type": "application/json;charset=UTF-8",
-    "Accept": "application/json, text/plain, */*",
-}
-
 MODES_CONVERTER = {
     "0": {"name": "stop", "description": "Stop"},
     "1": {"name": "cool-air", "description": "Air cooling"},

@@ -20,22 +20,22 @@ class Zone:
         return "Zone(name={}, is_on={}, mode={}, current_temp={}, target_temp={})".format(
             self.name,
             self.is_on,
-            self.mode_name,
+            self.mode,
             self.current_temperature,
             self.target_temperature,
         )
 
     @property
     def str_complete(self):
-        return "Zone(name={}, id={}, system_number={}, zone_number={}, is_on={}, mode={}, current_temperature={} target_temperature={})".format(
+        return "Zone(name={}, is_on={}, mode={}, current_temperature={} target_temperature={}, id={}, system_number={}, zone_number={})".format(
             self.name,
+            self.is_on,
+            self.mode,
+            self.current_temperature,
+            self.target_temperature,
             self.id,
             self.system_number,
             self.zone_number,
-            self.is_on,
-            self.mode_name,
-            self.current_temperature,
-            self.target_temperature,
         )
 
     #
@@ -82,15 +82,15 @@ class Zone:
 
     @property
     def mode(self):
-        return self._data.get("mode")
-
-    @property
-    def mode_name(self):
-        return MODES_CONVERTER[self.mode]["name"]
+        return MODES_CONVERTER[self.mode_raw]["name"]
 
     @property
     def mode_description(self):
-        return MODES_CONVERTER[self.mode]["description"]
+        return MODES_CONVERTER[self.mode_raw]["description"]
+
+    @property
+    def mode_raw(self):
+        return self._data.get("mode")
 
     @property
     def id(self):

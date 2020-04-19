@@ -7,6 +7,10 @@ _LOGGER = logging.getLogger(__name__)
 class Device:
     """Manage a AirzoneCloud device"""
 
+    _api = None
+    _data = {}
+    _systems = []
+
     def __init__(self, api, data):
         self._api = api
 
@@ -105,23 +109,52 @@ class Device:
         return self._systems
 
     #
+    # Refresh
+    #
+
+    def refresh(self, refresh_systems=True):
+        """ Refresh current device data (call refresh_devices on parent AirzoneCloud) """
+        self._api.refresh_devices()
+        if refresh_systems:
+            self.refresh_systems()
+
+    def refresh_systems(self):
+        """ Refresh all systems of this device """
+        self._load_systems()
+
+    #
     # private
     #
 
     def _load_systems(self):
         """Load all systems for this device"""
+        current_systems = self._systems
         self._systems = []
         try:
-            for system in self._api._get_systems(self.id):
-                self._systems.append(System(self._api, self, system))
+            for system_data in self._api._get_systems(self.id):
+                system = None
+                # search system in current_systems (if where are refreshing systems)
+                for current_system in current_systems:
+                    if current_system.id == system_data.get("id"):
+                        system = current_system
+                        system._set_data_refreshed(system_data)
+                        break
+                # system not found => instance new system
+                if system is None:
+                    system = System(self._api, self, system_data)
+                self._systems.append(system)
         except RuntimeError:
             raise Exception(
                 "Unable to load systems of device {} ({}) from AirzoneCloud".format(
                     self.name, self.id
                 )
             )
-
         return self._systems
+
+    def _set_data_refreshed(self, data):
+        """ Set data refreshed (call by parent AirzoneCloud on refresh_devices()) """
+        self._data = data
+        _LOGGER.info("Data refreshed for {}".format(self.str_complete))
 
 
 #

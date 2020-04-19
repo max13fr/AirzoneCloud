@@ -188,7 +188,7 @@ class System:
         return True
 
     #
-    # children zones
+    # children
     #
 
     @property
@@ -206,11 +206,17 @@ class System:
         return self._device
 
     #
-    # Refresh zone data
+    # Refresh
     #
 
+    def refresh(self, refresh_zones=True):
+        """ Refresh current system data (call refresh_systems on parent device) """
+        self.device.refresh_systems()
+        if refresh_zones:
+            self.refresh_zones()
+
     def refresh_zones(self):
-        """ Refresh current system data and all zones insides """
+        """ Refresh all zones of this system """
         self._load_zones()
 
     #
@@ -224,7 +230,7 @@ class System:
         try:
             for zone_data in self._api._get_zones(self.id):
                 zone = None
-                # search zone in current_zones (where are refreshing zones)
+                # search zone in current_zones (if where are refreshing zones)
                 for current_zone in current_zones:
                     if current_zone.id == zone_data.get("id"):
                         zone = current_zone
@@ -255,6 +261,11 @@ class System:
             }
         }
         return self._api._send_event(payload)
+
+    def _set_data_refreshed(self, data):
+        """ Set data refreshed (call by parent device on refresh_systems()) """
+        self._data = data
+        _LOGGER.info("Data refreshed for {}".format(self.str_complete))
 
 
 #

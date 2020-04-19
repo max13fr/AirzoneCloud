@@ -61,6 +61,14 @@ class AirzoneCloud:
         return result
 
     #
+    # Refresh
+    #
+
+    def refresh_devices(self):
+        """ Refresh devices """
+        self._load_devices()
+
+    #
     # private
     #
 
@@ -83,15 +91,25 @@ class AirzoneCloud:
         return self._token
 
     def _load_devices(self):
-        """Load all devices"""
+        """Load all devices for this account"""
+        current_devices = self._devices
         self._devices = []
         try:
             for device_relation in self._get_device_relations():
-                device = device_relation.get("device")
-                self.devices.append(Device(self, device))
+                device_data = device = device_relation.get("device")
+                device = None
+                # search device in current_devices (if where are refreshing devices)
+                for current_device in current_devices:
+                    if current_device.id == device_data.get("id"):
+                        device = current_device
+                        device._set_data_refreshed(device_data)
+                        break
+                # device not found => instance new device
+                if device is None:
+                    device = Device(self, device_data)
+                self._devices.append(device)
         except RuntimeError:
             raise Exception("Unable to load devices from AirzoneCloud")
-
         return self._devices
 
     def _get_device_relations(self):

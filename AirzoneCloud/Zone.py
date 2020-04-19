@@ -7,6 +7,10 @@ _LOGGER = logging.getLogger(__name__)
 class Zone:
     """Manage a Airzonecloud zone"""
 
+    _api = None
+    _system = None
+    _data = {}
+
     def __init__(self, api, system, data):
         self._api = api
         self._system = system

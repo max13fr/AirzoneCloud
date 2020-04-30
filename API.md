@@ -5,13 +5,13 @@
 ## AirzoneCloud.AirzoneCloud module
 
 
-### class AirzoneCloud.AirzoneCloud.AirzoneCloud(username, password, user_agent=None)
+### class AirzoneCloud.AirzoneCloud.AirzoneCloud(username, password, user_agent=None, base_url=None)
 Bases: `object`
 
 Allow to connect to AirzoneCloud API
 
 
-#### \__init__(username, password, user_agent=None)
+#### \__init__(username, password, user_agent=None, base_url=None)
 Initialize API connection
 
 

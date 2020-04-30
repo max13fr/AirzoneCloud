@@ -1,4 +1,3 @@
-BASE_URL = "https://www.airzonecloud.com"
 API_LOGIN = "/users/sign_in"
 API_DEVICE_RELATIONS = "/device_relations"
 API_SYSTEMS = "/systems"

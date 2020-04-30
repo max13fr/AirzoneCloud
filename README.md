@@ -15,6 +15,7 @@
       - [Available modes](#available-modes)
       - [Set HVAC mode on a system (and its sub-zones)](#set-hvac-mode-on-a-system-and-its-sub-zones)
   - [API doc](#api-doc)
+    - [Constructor](#constructor)
 
 ## Presentation
 
@@ -164,3 +165,16 @@ System(name=Home, mode=heat-both, eco=eco-a, velocity=None, airflow=None)
 ## API doc
 
 [API full doc](API.md)
+
+### Constructor
+
+```python
+AirzoneCloud(username, password, user_agent=None, base_url=None)
+```
+
+* **username** : you're username used to connect on Airzone Cloud website or app
+* **password** : you're password used to connect on Airzone Cloud website or app
+* **user_agent** : allow to change default user agent if set
+* **base_url** : allow to change base url of the Airzone Cloud API if set
+  * default value : _https://www.airzonecloud.com_
+  * dkn (Airzone Cloud rebranded for Daikin) : _https://dkn.airzonecloud.com_

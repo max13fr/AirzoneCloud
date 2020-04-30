@@ -7,7 +7,6 @@ import urllib.parse
 import json
 
 from .contants import (
-    BASE_URL,
     API_LOGIN,
     API_DEVICE_RELATIONS,
     API_SYSTEMS,
@@ -25,17 +24,22 @@ class AirzoneCloud:
     _session = None
     _username = None
     _password = None
+    _base_url = "https://www.airzonecloud.com"
     _user_agent = "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 7 Build/MOB30X; wv) AppleWebKit/537.26 (KHTML, like Gecko) Version/4.0 Chrome/70.0.3538.110 Safari/537.36"
     _token = None
     _devices = []
 
-    def __init__(self, username, password, user_agent=None):
+    def __init__(
+        self, username, password, user_agent=None, base_url=None,
+    ):
         """Initialize API connection"""
         self._session = requests.Session()
         self._username = username
         self._password = password
         if user_agent is not None and isinstance(user_agent, str):
             self._user_agent = user_agent
+        if base_url is not None and isinstance(base_url, str):
+            self._base_url = base_url
         # login
         self._login(username, password)
         # load devices
@@ -76,7 +80,7 @@ class AirzoneCloud:
         """Login to AirzoneCloud and return token"""
 
         try:
-            url = "{}{}".format(BASE_URL, API_LOGIN)
+            url = "{}{}".format(self._base_url, API_LOGIN)
             login_payload = {"email": username, "password": password}
             headers = {"User-Agent": self._user_agent}
             response = self._session.post(
@@ -143,7 +147,9 @@ class AirzoneCloud:
         params["format"] = "json"
         params["user_email"] = self._username
         params["user_token"] = self._token
-        url = "{}{}/?{}".format(BASE_URL, api_endpoint, urllib.parse.urlencode(params))
+        url = "{}{}/?{}".format(
+            self._base_url, api_endpoint, urllib.parse.urlencode(params)
+        )
         headers = {"User-Agent": self._user_agent}
         return self._session.get(url, headers=headers).json()
 
@@ -154,7 +160,7 @@ class AirzoneCloud:
             "user_token": self._token,
         }
         url = "{}{}/?{}".format(
-            BASE_URL, api_endpoint, urllib.parse.urlencode(uri_params)
+            self._base_url, api_endpoint, urllib.parse.urlencode(uri_params)
         )
         headers = {
             "User-Agent": self._user_agent,

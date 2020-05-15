@@ -6,7 +6,7 @@
     - [Module classes](#module-classes)
   - [Usage](#usage)
     - [Install](#install)
-    - [Start api](#start-api)
+    - [Start API](#start-api)
     - [Get device status](#get-device-status)
     - [Get system status](#get-system-status)
     - [Get all zones status (on all devices / systems)](#get-all-zones-status-on-all-devices--systems)
@@ -38,7 +38,7 @@ Allow to communicate easily with Airzone Cloud to retrieve information or to sen
 pip3 install AirzoneCloud
 ```
 
-### Start api
+### Start API
 
 ```python
 from AirzoneCloud import AirzoneCloud
@@ -65,14 +65,14 @@ Device name=Home, status=activated, id=5bc8ae0c4149526af90c0000, mac=AA:BB:CC:DD
 ### Get system status
 
 ```python
-for system in api.device[0].systems:
+for system in api.devices[0].systems:
     print(
         "System name={}, mode={}, eco={}, velocity={}, airflow={}".format(
-            self.name,
-            self.mode,
-            self.eco,
-            self.velocity,
-            self.airflow,
+            system.name,
+            system.mode,
+            system.eco,
+            system.velocity,
+            system.airflow,
         )
     )
 ```
@@ -91,7 +91,7 @@ for zone in api.all_zones:
         "Zone name={}, is_on={}, mode={}, current_temperature={}, target_temperature={}".format(
             zone.name,
             zone.is_on,
-            zone.mode_name,
+            zone.mode,
             zone.current_temperature,
             zone.target_temperature,
         )

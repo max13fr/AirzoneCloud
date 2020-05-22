@@ -55,6 +55,15 @@ class AirzoneCloud:
         return self._devices
 
     @property
+    def all_systems(self):
+        """Get all systems from all devices (same order as in app)"""
+        result = []
+        for device in self.devices:
+            for system in device.systems:
+                result.append(system)
+        return result
+
+    @property
     def all_zones(self):
         """Get all zones from all devices (same order as in app)"""
         result = []
@@ -137,7 +146,7 @@ class AirzoneCloud:
         try:
             result = self._post(API_EVENTS, payload)
             _LOGGER.debug("Result event: {}".format(json.dumps(result)))
-            return result  # XXX manage error ?
+            return result
         except RuntimeError:
             _LOGGER.error("Unable to send event to AirzoneCloud")
             return None

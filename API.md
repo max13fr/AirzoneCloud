@@ -15,6 +15,10 @@ Allow to connect to AirzoneCloud API
 Initialize API connection
 
 
+#### property all_systems()
+Get all systems from all devices (same order as in app)
+
+
 #### property all_zones()
 Get all zones from all devices (same order as in app)
 
@@ -113,6 +117,11 @@ Initialize self.  See help(type(self)) for accurate signature.
 
 #### property airflow_raw()
 
+#### ask_airzone_update()
+Ask an update to the airzone hardware (airzonecloud don’t autopull data like current temperature)
+The update should be available in airzonecloud after 3 to 5 secs in average
+
+
 #### property device()
 Get parent device
 
@@ -149,10 +158,6 @@ Get parent device
 
 #### refresh(refresh_zones=True)
 Refresh current system data (call refresh_systems on parent device)
-
-
-#### refresh_zones()
-Refresh all zones of this system
 
 
 #### set_mode(mode_name)
@@ -208,7 +213,7 @@ Initialize self.  See help(type(self)) for accurate signature.
 #### property name()
 
 #### refresh()
-Refresh current zone data (call refresh_zones on parent system)
+Refresh current zone data (call refresh on parent system)
 
 
 #### set_temperature(temperature)

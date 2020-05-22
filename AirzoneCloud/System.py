@@ -209,15 +209,25 @@ class System:
     # Refresh
     #
 
+    def ask_airzone_update(self):
+        """
+        Ask an update to the airzone hardware (airzonecloud don't autopull data like current temperature)
+        The update should be available in airzonecloud after 3 to 5 secs in average
+        """
+        self._ask_airzone_update()
+
     def refresh(self, refresh_zones=True):
         """ Refresh current system data (call refresh_systems on parent device) """
-        self.device.refresh_systems()
-        if refresh_zones:
-            self.refresh_zones()
 
-    def refresh_zones(self):
-        """ Refresh all zones of this system """
-        self._load_zones()
+        # ask airzone to update its data in airzonecloud (there is some delay so current update will be available on next refresh)
+        self.ask_airzone_update()
+
+        # refresh systems (including current) from parent device
+        self.device.refresh_systems()
+
+        # refresh subzones in needed
+        if refresh_zones:
+            self._load_zones()
 
     #
     # private
@@ -258,6 +268,19 @@ class System:
                 "system_number": self.system_number,
                 "option": option,
                 "value": value,
+            }
+        }
+        return self._api._send_event(payload)
+
+    def _ask_airzone_update(self):
+        """Ask an update to the airzone hardware (airzonecloud don't autopull data)"""
+        payload = {
+            "event": {
+                "cgi": "infosistema2",
+                "device_id": self.device_id,
+                "system_number": self.system_number,
+                "option": None,
+                "value": None,
             }
         }
         return self._api._send_event(payload)

@@ -177,4 +177,3 @@ AirzoneCloud(username, password, user_agent=None, base_url=None)
 * **user_agent** : allow to change default user agent if set
 * **base_url** : allow to change base url of the Airzone Cloud API if set
   * default value : _https://www.airzonecloud.com_
-  * dkn (Airzone Cloud rebranded for Daikin) : _https://dkn.airzonecloud.com_

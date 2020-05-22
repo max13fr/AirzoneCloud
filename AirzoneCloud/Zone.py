@@ -158,8 +158,8 @@ class Zone:
     #
 
     def refresh(self):
-        """ Refresh current zone data (call refresh_zones on parent system) """
-        self.system.refresh_zones()
+        """ Refresh current zone data (call refresh on parent system) """
+        self.system.refresh()
 
     #
     # private

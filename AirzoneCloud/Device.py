@@ -17,6 +17,7 @@ class Device:
         # remove weather (huge array with all translates)
         if "data" in data and "data" in data["data"]:
             data["data"]["data"].pop("weather", True)
+
         self._data = data
 
         # log

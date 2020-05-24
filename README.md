@@ -23,6 +23,10 @@
 
 Allow to communicate easily with Airzone Cloud to retrieve information or to send commands (on/off, temperature, HVAC mode, ...)
 
+This library manage the main Airzone Cloud API (try to connect to [www.airzonecloud.com](https://www.airzonecloud.com) to be sure).
+
+If you are looking for the specific Airzone Cloud API for Daikin (try to connect to [dkn.airzonecloud.com](https://dkn.airzonecloud.com)), you should use this package : [AirzoneCloudDaikin](https://github.com/max13fr/AirzoneCloudDaikin)
+
 ### Module classes
 
 * **AirzoneCloud** : represent your AirzoneCloud account. Contains a list of your **devices** :

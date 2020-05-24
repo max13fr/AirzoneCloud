@@ -109,7 +109,7 @@ class AirzoneCloud:
         self._devices = []
         try:
             for device_relation in self._get_device_relations():
-                device_data = device = device_relation.get("device")
+                device_data = device_relation.get("device")
                 device = None
                 # search device in current_devices (if where are refreshing devices)
                 for current_device in current_devices:

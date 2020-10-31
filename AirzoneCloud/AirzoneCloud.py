@@ -186,6 +186,11 @@ class AirzoneCloud:
         call = self._session.request(method=method, url=url, headers=headers, json=json)
 
         if call.status_code == 401 and autoreconnect:  # unauthorized error
+            # log
+            _LOGGER.info(
+                "Get unauthorized error (token expired ?), trying to reconnect..."
+            )
+
             # try to reconnect
             self._login()
 

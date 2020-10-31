@@ -3,5 +3,5 @@ __pycache__/
 .vscode
 TODROP.py
 dist/
-AirzoneCloud.egg-info/
+*.egg-info/
 Sphinx-docs

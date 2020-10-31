@@ -41,7 +41,7 @@ class AirzoneCloud:
         if base_url is not None and isinstance(base_url, str):
             self._base_url = base_url
         # login
-        self._login(username, password)
+        self._login()
         # load devices
         self._load_devices()
 
@@ -85,12 +85,12 @@ class AirzoneCloud:
     # private
     #
 
-    def _login(self, username, password):
+    def _login(self):
         """Login to AirzoneCloud and return token"""
 
         try:
             url = "{}{}".format(self._base_url, API_LOGIN)
-            login_payload = {"email": username, "password": password}
+            login_payload = {"email": self._username, "password": self._password}
             headers = {"User-Agent": self._user_agent}
             response = self._session.post(
                 url, headers=headers, json=login_payload
@@ -154,27 +154,52 @@ class AirzoneCloud:
     def _get(self, api_endpoint, params={}):
         """Do a http GET request on an api endpoint"""
         params["format"] = "json"
+
+        return self._request(method="GET", api_endpoint=api_endpoint, params=params)
+
+    def _post(self, api_endpoint, payload={}):
+        """Do a http POST request on an api endpoint"""
+        headers = {
+            "X-Requested-With": "XMLHttpRequest",
+            "Content-Type": "application/json;charset=UTF-8",
+            "Accept": "application/json, text/plain, */*",
+        }
+
+        return self._request(
+            method="POST", api_endpoint=api_endpoint, headers=headers, json=payload
+        )
+
+    def _request(
+        self, method, api_endpoint, params={}, headers={}, json=None, autoreconnect=True
+    ):
+        # generate url with auth
         params["user_email"] = self._username
         params["user_token"] = self._token
         url = "{}{}/?{}".format(
             self._base_url, api_endpoint, urllib.parse.urlencode(params)
         )
-        headers = {"User-Agent": self._user_agent}
-        return self._session.get(url, headers=headers).json()
 
-    def _post(self, api_endpoint, payload={}):
-        """Do a http POST request on an api endpoint"""
-        uri_params = {
-            "user_email": self._username,
-            "user_token": self._token,
-        }
-        url = "{}{}/?{}".format(
-            self._base_url, api_endpoint, urllib.parse.urlencode(uri_params)
-        )
-        headers = {
-            "User-Agent": self._user_agent,
-            "X-Requested-With": "XMLHttpRequest",
-            "Content-Type": "application/json;charset=UTF-8",
-            "Accept": "application/json, text/plain, */*",
-        }
-        return self._session.post(url, headers=headers, json=payload).json()
+        # set user agent
+        headers["User-Agent"] = self._user_agent
+
+        # make call
+        call = self._session.request(method=method, url=url, headers=headers, json=json)
+
+        if call.status_code == 401 and autoreconnect:  # unauthorized error
+            # try to reconnect
+            self._login()
+
+            # retry get without autoreconnect (to avoid infinite loop)
+            return self._request(
+                method=method,
+                api_endpoint=api_endpoint,
+                params=params,
+                headers=headers,
+                json=json,
+                autoreconnect=False,
+            )
+
+        # raise other error if needed
+        call.raise_for_status()
+
+        return call.json()

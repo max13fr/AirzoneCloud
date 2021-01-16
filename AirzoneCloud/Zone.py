@@ -94,7 +94,7 @@ class Zone:
 
     @property
     def mode_raw(self):
-        return self._data.get("mode")
+        return str(self._data.get("mode"))
 
     @property
     def id(self):

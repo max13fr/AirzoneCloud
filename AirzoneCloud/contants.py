@@ -1,6 +1,6 @@
 API = "/api/v1"
 API_LOGIN = "{}/auth/login".format(API)
-API_INSTALLATIONS = "{}/installations".format(API)
+API_SITES = "{}/installations".format(API)
 API_SYSTEMS = "/systems"
 API_ZONES = "/zones"
 API_EVENTS = "/events"

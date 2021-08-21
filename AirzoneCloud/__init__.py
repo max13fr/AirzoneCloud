@@ -1,4 +1,4 @@
 from .AirzoneCloud import AirzoneCloud
-from .Installation import Installation
+from .Site import Site
 from .System import System
 from .Zone import Zone

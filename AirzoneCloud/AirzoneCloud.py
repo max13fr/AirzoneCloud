@@ -9,12 +9,12 @@ import urllib.parse
 
 from .contants import (
     API_LOGIN,
-    API_INSTALLATIONS,
+    API_SITES,
     API_SYSTEMS,
     API_ZONES,
     API_EVENTS,
 )
-from .Installation import Installation
+from .Site import Site
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ class AirzoneCloud:
     _base_url = "https://m.airzonecloud.com"
     _user_agent = "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 7 Build/MOB30X; wv) AppleWebKit/537.26 (KHTML, like Gecko) Version/4.0 Chrome/70.0.3538.110 Safari/537.36"
     _token = None
-    _installations = {}
+    _sites = {}
 
     def __init__(
         self, username, password, user_agent=None, base_url=None,
@@ -43,33 +43,33 @@ class AirzoneCloud:
             self._base_url = base_url
         # login
         self._login()
-        # load installations
-        self._load_installations()
+        # load sites
+        self._load_sites()
 
     #
     # getters
     #
 
     @property
-    def installations(self):
-        """Get installations list (same order as in app)"""
-        return list(self._installations.values())
+    def sites(self):
+        """Get sites list (same order as in app)"""
+        return list(self._sites.values())
 
     @property
     def all_systems(self):
-        """Get all systems from all installations (same order as in app)"""
+        """Get all systems from all sites (same order as in app)"""
         result = []
-        for installation in self.installations:
-            for system in installation.systems:
+        for site in self.sites:
+            for system in site.systems:
                 result.append(system)
         return result
 
     @property
     def all_zones(self):
-        """Get all zones from all installations (same order as in app)"""
+        """Get all zones from all sites (same order as in app)"""
         result = []
-        for installation in self.installations:
-            for system in installation.systems:
+        for site in self.sites:
+            for system in site.systems:
                 for zone in system.zones:
                     result.append(zone)
         return result
@@ -78,9 +78,9 @@ class AirzoneCloud:
     # Refresh
     #
 
-    def refresh_installations(self):
-        """Refresh installations"""
-        self._load_installations()
+    def refresh_sites(self):
+        """Refresh sites"""
+        self._load_sites()
 
     #
     # private
@@ -104,39 +104,39 @@ class AirzoneCloud:
 
         return self._token
 
-    def _load_installations(self):
-        """Load all installations for this account"""
-        current_installations = self._installations
-        self._installations = {}
+    def _load_sites(self):
+        """Load all sites for this account"""
+        current_sites = self._sites
+        self._sites = {}
         try:
-            for installation_data in self._get_installations():
-                #pprint.pprint(installation_data)
-                installation_id = installation_data.get("installation_id")
-                installation = current_installations.get(installation_id)
-                # installation not found => instance new installation
-                if installation is None:
-                    installation = Installation(self, installation_id)
+            for site_data in self._get_sites():
+                #pprint.pprint(site_data)
+                site_id = site_data.get("installation_id")
+                site = current_sites.get(site_id)
+                # site not found => instance new site
+                if site is None:
+                    site = Site(self, site_id)
                 else:
-                    installation.refersh();
-                self._installations.append(installation)
+                    site.refersh();
+                self._sites.append(site)
         except RuntimeError:
-            raise Exception("Unable to load installations from AirzoneCloud")
-        return self._installations
+            raise Exception("Unable to load sites from AirzoneCloud")
+        return self._sites
 
-    def _get_installations(self):
-        """Http GET to load installations"""
-        _LOGGER.debug("get_installations()")
-        return self._get(API_INSTALLATIONS).get("installations")
+    def _get_sites(self):
+        """Http GET to load sites"""
+        _LOGGER.debug("get_sites()")
+        return self._get(API_SITES).get("installations")
 
-    def _get_installation(self, installation_id):
-        """Http GET to load installations"""
-        _LOGGER.debug("get_installation()")
-        return self._get("{}/{}".format(API_INSTALLATIONS, installation_id))
+    def _get_site(self, site_id):
+        """Http GET to load sites"""
+        _LOGGER.debug("get_site()")
+        return self._get("{}/{}".format(API_SITES, site_id))
 
-    def _get_systems(self, installation_id):
+    def _get_systems(self, site_id):
         """Http GET to load systems"""
-        _LOGGER.debug("get_systems(installation_id={})".format(installation_id))
-        return self._get(API_SYSTEMS, {"installation_id": installation_id}).get("systems")
+        _LOGGER.debug("get_systems(site_id={})".format(site_id))
+        return self._get(API_SYSTEMS, {"site_id": site_id}).get("systems")
 
     def _get_zones(self, system_id):
         """Http GET to load Zones"""

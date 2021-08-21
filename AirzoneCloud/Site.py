@@ -12,13 +12,14 @@ class Site:
     def __init__(self, api, site_id):
         self._api = api
         self._site_id = site_id
+        self._systems = {}
 
         # load all systems
         self.refresh()
 
         # log
         _LOGGER.info("Init {}".format(self.str_complete))
-        _LOGGER.debug(data)
+        _LOGGER.debug(self._data)
 
     def __str__(self):
         return "Site(name={}, status={})".format(self.name, self.status)
@@ -100,7 +101,7 @@ class Site:
 
     @property
     def systems(self):
-        return self._systems
+        return list(self._systems.values())
 
     #
     # Refresh
@@ -124,20 +125,16 @@ class Site:
     def _load_systems(self):
         """Load all systems for this site"""
         current_systems = self._systems
-        self._systems = []
+        self._systems = {}
         try:
-            for system_data in self._api._get_systems(self.id):
-                system = None
-                # search system in current_systems (if where are refreshing systems)
-                for current_system in current_systems:
-                    if current_system.id == system_data.get("id"):
-                        system = current_system
-                        system._set_data_refreshed(system_data)
-                        break
+            for system_data in self._data["groups"]:
+                system = self._systems.get(system_data.get("group_id"))
                 # system not found => instance new system
                 if system is None:
                     system = System(self._api, self, system_data)
-                self._systems.append(system)
+                else:
+                    system._set_data_refreshed(system_data)
+                self._systems[system.id] = system
         except RuntimeError:
             raise Exception(
                 "Unable to load systems of site {} ({}) from AirzoneCloud".format(

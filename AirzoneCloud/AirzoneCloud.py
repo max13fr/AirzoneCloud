@@ -118,7 +118,7 @@ class AirzoneCloud:
                     site = Site(self, site_id)
                 else:
                     site.refersh();
-                self._sites.append(site)
+                self._sites[site.id] = site
         except RuntimeError:
             raise Exception("Unable to load sites from AirzoneCloud")
         return self._sites

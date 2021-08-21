@@ -1,10 +1,11 @@
 #!/usr/bin/python3
 
+import json
 import logging
+import pprint
 import requests
 import urllib
 import urllib.parse
-import json
 
 from .contants import (
     API_LOGIN,
@@ -24,7 +25,7 @@ class AirzoneCloud:
     _session = None
     _username = None
     _password = None
-    _base_url = "https://www.airzonecloud.com"
+    _base_url = "https://m.airzonecloud.com"
     _user_agent = "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 7 Build/MOB30X; wv) AppleWebKit/537.26 (KHTML, like Gecko) Version/4.0 Chrome/70.0.3538.110 Safari/537.36"
     _token = None
     _devices = []
@@ -95,7 +96,7 @@ class AirzoneCloud:
             response = self._session.post(
                 url, headers=headers, json=login_payload
             ).json()
-            self._token = response.get("user").get("authentication_token")
+            self._token = response.get("token")
         except (RuntimeError, AttributeError):
             raise Exception("Unable to login to AirzoneCloud") from None
 
@@ -173,8 +174,7 @@ class AirzoneCloud:
         self, method, api_endpoint, params={}, headers={}, json=None, autoreconnect=True
     ):
         # generate url with auth
-        params["user_email"] = self._username
-        params["user_token"] = self._token
+        headers["authorization"] = "Bearer {}".format(self._token)
         url = "{}{}/?{}".format(
             self._base_url, api_endpoint, urllib.parse.urlencode(params)
         )
@@ -183,7 +183,7 @@ class AirzoneCloud:
         headers["User-Agent"] = self._user_agent
 
         # make call
-        call = self._session.request(method=method, url=url, headers=headers, json=json)
+        call = self._session.request(method=method, url=url, headers=headers)
 
         if call.status_code == 401 and autoreconnect:  # unauthorized error
             # log
@@ -206,5 +206,5 @@ class AirzoneCloud:
 
         # raise other error if needed
         call.raise_for_status()
-
+        pprint.pprint(call.json())
         return call.json()

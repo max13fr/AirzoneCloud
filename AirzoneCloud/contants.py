@@ -1,4 +1,4 @@
-API_LOGIN = "/users/sign_in"
+API_LOGIN = "/api/v1/auth/login"
 API_DEVICE_RELATIONS = "/device_relations"
 API_SYSTEMS = "/systems"
 API_ZONES = "/zones"

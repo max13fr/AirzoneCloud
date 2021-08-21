@@ -2,7 +2,8 @@ API = "/api/v1"
 API_LOGIN = "{}/auth/login".format(API)
 API_SITES = "{}/installations".format(API)
 API_SYSTEMS = "/systems"
-API_ZONES = "/zones"
+API_ZONES = "{}/devices".format(API)
+API_ZONE = "{}/devices".format(API)
 API_EVENTS = "/events"
 
 # 2020-04-18: extracted from https://airzonecloud.com/assets/application-506494af86e686bf472b872d02048b42.js

@@ -1,4 +1,6 @@
 import logging
+import pprint
+
 from .contants import MODES_CONVERTER
 
 _LOGGER = logging.getLogger(__name__)
@@ -7,18 +9,16 @@ _LOGGER = logging.getLogger(__name__)
 class Zone:
     """Manage a Airzonecloud zone"""
 
-    _api = None
-    _system = None
-    _data = {}
-
-    def __init__(self, api, system, data):
+    def __init__(self, api, system, zone_id):
         self._api = api
+        self._zone_id = zone_id
         self._system = system
-        self._data = data
+        self._data = {}
+        self.refresh()
 
         # log
         _LOGGER.info("Init {}".format(self.str_complete))
-        _LOGGER.debug(data)
+        _LOGGER.debug(zone_id)
 
     def __str__(self):
         return "Zone(name={}, is_on={}, mode={}, current_temp={}, target_temp={})".format(
@@ -31,6 +31,7 @@ class Zone:
 
     @property
     def str_complete(self):
+        return "Zone"
         return "Zone(name={}, is_on={}, mode={}, current_temperature={} target_temperature={}, id={}, system_number={}, zone_number={})".format(
             self.name,
             self.is_on,
@@ -159,7 +160,7 @@ class Zone:
 
     def refresh(self):
         """ Refresh current zone data (call refresh on parent system) """
-        self.system.refresh()
+        self._config_data = self._api._get_zone_config(self.system.site.id, self._zone_id)
 
     #
     # private
@@ -178,11 +179,6 @@ class Zone:
             }
         }
         return self._api._send_event(payload)
-
-    def _set_data_refreshed(self, data):
-        """ Set data refreshed (call by parent system on refresh_zones()) """
-        self._data = data
-        _LOGGER.info("Data refreshed for {}".format(self.str_complete))
 
 
 #

@@ -37,7 +37,7 @@ class Site:
     @property
     def id(self):
         """ Return site id """
-        return self._data.get("id")
+        return self._data.get("installation_id")
 
     @property
     def name(self):

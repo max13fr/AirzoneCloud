@@ -10,8 +10,8 @@ import urllib.parse
 from .contants import (
     API_LOGIN,
     API_SITES,
-    API_SYSTEMS,
     API_ZONES,
+    API_ZONE,
     API_EVENTS,
 )
 from .Site import Site
@@ -129,19 +129,19 @@ class AirzoneCloud:
         return self._get(API_SITES).get("installations")
 
     def _get_site(self, site_id):
-        """Http GET to load sites"""
-        _LOGGER.debug("get_site()")
+        """Http GET to load site"""
+        _LOGGER.debug("get_site({})".format(site_id))
         return self._get("{}/{}".format(API_SITES, site_id))
 
-    def _get_systems(self, site_id):
-        """Http GET to load systems"""
-        _LOGGER.debug("get_systems(site_id={})".format(site_id))
-        return self._get(API_SYSTEMS, {"site_id": site_id}).get("systems")
+    def _get_zone(self, zone_id):
+        """Http GET to load Zone"""
+        _LOGGER.debug("get_zone({})".format(zone_id))
+        return self._get("{}/{}".format(API_ZONES, "60f817cc7b7b998ed14b58f9"))
 
-    def _get_zones(self, system_id):
-        """Http GET to load Zones"""
-        _LOGGER.debug("get_zones(system_id={})".format(system_id))
-        return self._get(API_ZONES, {"system_id": system_id}).get("zones")
+    def _get_zone_config(self, site_id, zone_id):
+        """Http GET to load Zone"""
+        _LOGGER.debug("get_zone_config({}, {})".format(site_id, zone_id))
+        return self._get("{}/{}/config".format(API_ZONE, zone_id), params = { "installation_id": site_id, "type": "user"})
 
     def _send_event(self, payload):
         """Http POST to send an event"""
@@ -180,6 +180,7 @@ class AirzoneCloud:
         url = "{}{}/?{}".format(
             self._base_url, api_endpoint, urllib.parse.urlencode(params)
         )
+        #pprint.pprint(url)
 
         # set user agent
         headers["User-Agent"] = self._user_agent
@@ -208,6 +209,5 @@ class AirzoneCloud:
 
         # raise other error if needed
         call.raise_for_status()
-        #pprint.pprint(url)
         #pprint.pprint(call.json())
         return call.json()

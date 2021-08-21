@@ -1,4 +1,6 @@
 import logging
+import pprint
+
 from .contants import (
     MODES_CONVERTER,
     ECO_CONVERTER,
@@ -16,11 +18,11 @@ class System:
     def __init__(self, api, site, data):
         self._api = api
         self._site = site
-        self._zones = []
+        self._zones = {}
         self._set_data_refreshed(data)
 
         # load zones
-        #self._load_zones()
+        self._load_zones()
 
         # log
         _LOGGER.info("Init {}".format(self.str_complete))
@@ -231,21 +233,19 @@ class System:
 
     def _load_zones(self):
         """Load all zones for this system"""
+        #pprint.pprint(self._data)
         current_zones = self._zones
-        self._zones = []
+        self._zones = {}
         try:
-            for zone_data in self._api._get_zones(self.id):
-                zone = None
-                # search zone in current_zones (if where are refreshing zones)
-                for current_zone in current_zones:
-                    if current_zone.id == zone_data.get("id"):
-                        zone = current_zone
-                        zone._set_data_refreshed(zone_data)
-                        break
+            for zone_data in self._data.get("devices"):
+                zone_id = zone_data["device_id"]
+                zone = current_zones.get(zone_id)
                 # zone not found => instance new zone
                 if zone is None:
-                    zone = Zone(self._api, self, zone_data)
-                self._zones.append(zone)
+                    zone = Zone(self._api, self, zone_id)
+                else:
+                    pass
+                self._zones[zone.id] = zone
         except RuntimeError:
             raise Exception(
                 "Unable to load zones of system {} ({}) from AirzoneCloud".format(

@@ -5,3 +5,4 @@ TODROP.py
 dist/
 *.egg-info/
 Sphinx-docs
+config.json

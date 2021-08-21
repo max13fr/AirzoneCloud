@@ -9,12 +9,12 @@ import urllib.parse
 
 from .contants import (
     API_LOGIN,
-    API_DEVICE_RELATIONS,
+    API_INSTALLATIONS,
     API_SYSTEMS,
     API_ZONES,
     API_EVENTS,
 )
-from .Device import Device
+from .Installation import Installation
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ class AirzoneCloud:
     _base_url = "https://m.airzonecloud.com"
     _user_agent = "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 7 Build/MOB30X; wv) AppleWebKit/537.26 (KHTML, like Gecko) Version/4.0 Chrome/70.0.3538.110 Safari/537.36"
     _token = None
-    _devices = []
+    _installations = {}
 
     def __init__(
         self, username, password, user_agent=None, base_url=None,
@@ -43,33 +43,33 @@ class AirzoneCloud:
             self._base_url = base_url
         # login
         self._login()
-        # load devices
-        self._load_devices()
+        # load installations
+        self._load_installations()
 
     #
     # getters
     #
 
     @property
-    def devices(self):
-        """Get devices list (same order as in app)"""
-        return self._devices
+    def installations(self):
+        """Get installations list (same order as in app)"""
+        return list(self._installations.values())
 
     @property
     def all_systems(self):
-        """Get all systems from all devices (same order as in app)"""
+        """Get all systems from all installations (same order as in app)"""
         result = []
-        for device in self.devices:
-            for system in device.systems:
+        for installation in self.installations:
+            for system in installation.systems:
                 result.append(system)
         return result
 
     @property
     def all_zones(self):
-        """Get all zones from all devices (same order as in app)"""
+        """Get all zones from all installations (same order as in app)"""
         result = []
-        for device in self.devices:
-            for system in device.systems:
+        for installation in self.installations:
+            for system in installation.systems:
                 for zone in system.zones:
                     result.append(zone)
         return result
@@ -78,9 +78,9 @@ class AirzoneCloud:
     # Refresh
     #
 
-    def refresh_devices(self):
-        """Refresh devices"""
-        self._load_devices()
+    def refresh_installations(self):
+        """Refresh installations"""
+        self._load_installations()
 
     #
     # private
@@ -104,37 +104,39 @@ class AirzoneCloud:
 
         return self._token
 
-    def _load_devices(self):
-        """Load all devices for this account"""
-        current_devices = self._devices
-        self._devices = []
+    def _load_installations(self):
+        """Load all installations for this account"""
+        current_installations = self._installations
+        self._installations = {}
         try:
-            for device_relation in self._get_device_relations():
-                device_data = device_relation.get("device")
-                device = None
-                # search device in current_devices (if where are refreshing devices)
-                for current_device in current_devices:
-                    if current_device.id == device_data.get("id"):
-                        device = current_device
-                        device._set_data_refreshed(device_data)
-                        break
-                # device not found => instance new device
-                if device is None:
-                    device = Device(self, device_data)
-                self._devices.append(device)
+            for installation_data in self._get_installations():
+                #pprint.pprint(installation_data)
+                installation_id = installation_data.get("installation_id")
+                installation = current_installations.get(installation_id)
+                # installation not found => instance new installation
+                if installation is None:
+                    installation = Installation(self, installation_id)
+                else:
+                    installation.refersh();
+                self._installations.append(installation)
         except RuntimeError:
-            raise Exception("Unable to load devices from AirzoneCloud")
-        return self._devices
+            raise Exception("Unable to load installations from AirzoneCloud")
+        return self._installations
 
-    def _get_device_relations(self):
-        """Http GET to load devices"""
-        _LOGGER.debug("get_device_relations()")
-        return self._get(API_DEVICE_RELATIONS).get("device_relations")
+    def _get_installations(self):
+        """Http GET to load installations"""
+        _LOGGER.debug("get_installations()")
+        return self._get(API_INSTALLATIONS).get("installations")
 
-    def _get_systems(self, device_id):
+    def _get_installation(self, installation_id):
+        """Http GET to load installations"""
+        _LOGGER.debug("get_installation()")
+        return self._get("{}/{}".format(API_INSTALLATIONS, installation_id))
+
+    def _get_systems(self, installation_id):
         """Http GET to load systems"""
-        _LOGGER.debug("get_systems(device_id={})".format(device_id))
-        return self._get(API_SYSTEMS, {"device_id": device_id}).get("systems")
+        _LOGGER.debug("get_systems(installation_id={})".format(installation_id))
+        return self._get(API_SYSTEMS, {"installation_id": installation_id}).get("systems")
 
     def _get_zones(self, system_id):
         """Http GET to load Zones"""
@@ -206,5 +208,6 @@ class AirzoneCloud:
 
         # raise other error if needed
         call.raise_for_status()
-        pprint.pprint(call.json())
+        #pprint.pprint(url)
+        #pprint.pprint(call.json())
         return call.json()

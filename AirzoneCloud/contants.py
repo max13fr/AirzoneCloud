@@ -1,5 +1,6 @@
-API_LOGIN = "/api/v1/auth/login"
-API_DEVICE_RELATIONS = "/device_relations"
+API = "/api/v1"
+API_LOGIN = "{}/auth/login".format(API)
+API_INSTALLATIONS = "{}/installations".format(API)
 API_SYSTEMS = "/systems"
 API_ZONES = "/zones"
 API_EVENTS = "/events"

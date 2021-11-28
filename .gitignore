@@ -1,7 +1,8 @@
 __pycache__/
 **.pyc
-.vscode
-TODROP.py
-dist/
 *.egg-info/
+.vscode
+dist/
 Sphinx-docs
+config_test.json
+TODROP.py

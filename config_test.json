@@ -1,5 +1,5 @@
 {
-    "username": "changeme@example.com",
+    "email": "changeme@example.com",
     "password": "changeme",
     "log_level": "INFO",
     "display_api_token": false,

@@ -3,10 +3,10 @@
 import logging, json
 from AirzoneCloud import AirzoneCloud
 
-config = json.load(open("config.json"))
+config = json.load(open("config_test.json"))
 
 logging.basicConfig(level=config.get("log_level", "INFO"))
-api = AirzoneCloud(config.get("username"), config.get("email"))
+api = AirzoneCloud(config.get("email"), config.get("password"))
 
 if config.get("display_api_token", False):
     print("API token = ", api._token, "\n")
@@ -19,6 +19,7 @@ for installation in api.installations:
             print(device.str_verbose)
             if config.get("display_device_properties", False):
                 print(device.str_all_properties)
+
             # if device.name == "Salon":
             #     # device.turn_on(auto_refresh=False).set_temperature(20)
             #     device.set_mode("heating")

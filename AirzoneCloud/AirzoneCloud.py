@@ -19,16 +19,16 @@ _LOGGER = logging.getLogger(__name__)
 class AirzoneCloud:
     """Allow to connect to AirzoneCloud API"""
 
-    _username: str = None
+    _email: str = None
     _password: str = None
     _user_agent: str = "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 7 Build/MOB30X; wv) AppleWebKit/537.26 (KHTML, like Gecko) Version/4.0 Chrome/70.0.3538.110 Safari/537.36"
     _session: requests.Session = None
     _token: str = None
     _installations: "list[Installation]" = []
 
-    def __init__(self, username: str, password: str, user_agent: str = None,) -> None:
+    def __init__(self, email: str, password: str, user_agent: str = None,) -> None:
         """Initialize API connection"""
-        self._username = username
+        self._email = email
         self._password = password
         if user_agent is not None and isinstance(user_agent, str):
             self._user_agent = user_agent
@@ -87,12 +87,14 @@ class AirzoneCloud:
 
         try:
             url = "{}/auth/login".format(API_URL)
-            login_payload = {"email": self._username, "password": self._password}
+            login_payload = {"email": self._email, "password": self._password}
             headers = {"User-Agent": self._user_agent}
             response = self._session.post(url, headers=headers, json=login_payload)
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
-            raise Exception("Unable to login to AirzoneCloud") from None
+            raise Exception(
+                "Unable to login to AirzoneCloud for email {}".format(self._email)
+            ) from None
 
         self._token = response.json().get("token")
         if not self._token:
@@ -102,7 +104,7 @@ class AirzoneCloud:
                 )
             )
 
-        _LOGGER.info("Login success as {}".format(self._username))
+        _LOGGER.info("Login success as {}".format(self._email))
 
         return self._token
 

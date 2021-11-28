@@ -183,11 +183,9 @@ Device(name=Dknwserver, is_on=False, mode=heat, current_temp=25.0, target_temp=2
 ### Constructor
 
 ```python
-AirzoneCloud(username, password, user_agent=None, base_url=None)
+AirzoneCloud(email, password, user_agent=None
 ```
 
-- **username** : you're username used to connect on Airzone Cloud website or app
+- **email** : you're email used to connect on Airzone Cloud website or app
 - **password** : you're password used to connect on Airzone Cloud website or app
 - **user_agent** : allow to change default user agent if set
-- **base_url** : allow to change base url of the Airzone Cloud API if set
-  - default value : _https://dkn.airzonecloud.com_

@@ -13,7 +13,6 @@
     - [Get devices for each grou of each installation](#get-devices-for-each-grou-of-each-installation)
     - [Get all devices from all installations shortcut](#get-all-devices-from-all-installations-shortcut)
     - [Control a device](#control-a-device)
-- [XXX following not update to date](#xxx-following-not-update-to-date)
     - [HVAC mode](#hvac-mode)
       - [Available modes](#available-modes)
       - [List supported modes for each devices](#list-supported-modes-for-each-devices)
@@ -190,8 +189,6 @@ Device(name=Salon, is_connected=True, is_on=False, mode=heating, current_temp=20
 Device(name=Salon, is_connected=True, is_on=True, mode=heating, current_temp=20.8, target_temp=22.0)
 Device(name=Salon, is_connected=True, is_on=False, mode=heating, current_temp=20.8, target_temp=22.0)
 </pre>
-
-# XXX following not update to date
 
 ### HVAC mode
 

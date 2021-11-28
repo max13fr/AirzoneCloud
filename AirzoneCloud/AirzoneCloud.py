@@ -24,7 +24,7 @@ class AirzoneCloud:
     _token: str = None
     _installations: "list[Installation]" = []
 
-    def __init__(self, email: str, password: str, user_agent: str = None,) -> None:
+    def __init__(self, email: str, password: str, user_agent: str = None) -> None:
         """Initialize API connection"""
         self._email = email
         self._password = password

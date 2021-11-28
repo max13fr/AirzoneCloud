@@ -7,6 +7,7 @@
   - [Usage](#usage)
     - [Install](#install)
     - [Start API](#start-api)
+- [XXX following not update to date](#xxx-following-not-update-to-date)
     - [Get installations](#get-installations)
     - [Get devices from installations](#get-devices-from-installations)
     - [Get all devices shortcut](#get-all-devices-shortcut)
@@ -15,7 +16,6 @@
       - [Available modes](#available-modes)
       - [Set HVAC mode on a system (and its sub-zones)](#set-hvac-mode-on-a-system-and-its-sub-zones)
   - [API doc](#api-doc)
-    - [Constructor](#constructor)
 
 ## Presentation
 
@@ -50,6 +50,8 @@ pip3 install AirzoneCloud
 from AirzoneCloud import AirzoneCloud
 api = AirzoneCloud("email@domain.com", "password")
 ```
+
+# XXX following not update to date
 
 ### Get installations
 
@@ -179,13 +181,3 @@ Device(name=Dknwserver, is_on=False, mode=heat, current_temp=25.0, target_temp=2
 ## API doc
 
 [API full doc](API.md)
-
-### Constructor
-
-```python
-AirzoneCloud(email, password, user_agent=None
-```
-
-- **email** : you're email used to connect on Airzone Cloud website or app
-- **password** : you're password used to connect on Airzone Cloud website or app
-- **user_agent** : allow to change default user agent if set

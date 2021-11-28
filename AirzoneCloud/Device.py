@@ -1,7 +1,6 @@
 import logging
 import time
 from typing import Union
-
 from . import AirzoneCloud, Group
 from .constants import MODES_CONVERTER
 

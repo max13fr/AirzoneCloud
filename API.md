@@ -1,212 +1,243 @@
-# AirzoneCloudDaikin package
+# AirzoneCloud package
 
 ## Submodules
 
-## AirzoneCloudDaikin.AirzoneCloudDaikin module
+## AirzoneCloud.AirzoneCloud module
 
 
-### class AirzoneCloudDaikin.AirzoneCloudDaikin.AirzoneCloudDaikin(username, password, user_agent=None, base_url=None)
+### class AirzoneCloud.AirzoneCloud.AirzoneCloud(email: str, password: str, user_agent: Optional[str] = None)
 Bases: `object`
 
-Allow to connect to AirzoneCloudDaikin API
+Allow to connect to AirzoneCloud API
 
 
-#### \__init__(username, password, user_agent=None, base_url=None)
+#### \__init__(email: str, password: str, user_agent: Optional[str] = None)
 Initialize API connection
 
 
-#### property all_devices()
-Get all devices from all installations (same order as in app)
+#### property all_devices(: list[Device])
+Get all devices from all installations
 
 
-#### property installations()
-Get installations list (same order as in app)
+#### property all_groups(: list[Group])
+Get all groups from all installations
+
+
+#### property installations(: list[Installation])
+Get installations list
 
 
 #### refresh_installations()
 Refresh installations
 
-## AirzoneCloudDaikin.Device module
+## AirzoneCloud.Device module
 
 
-### class AirzoneCloudDaikin.Device.Device(api, installation, data)
+### class AirzoneCloud.Device.Device(api: AirzoneCloud, group: Group, data: dict)
 Bases: `object`
 
-Manage a AirzoneCloudDaikin device
+Manage a AirzoneCloud device (thermostat)
 
 
-#### \__init__(api, installation, data)
-Initialize self.  See help(type(self)) for accurate signature.
+#### \__init__(api: AirzoneCloud, group: Group, data: dict)
+
+#### property all_properties(: dict)
+
+#### property current_humidity(: int)
+Return device current humidity in percentage (0-100)
 
 
-#### ask_airzone_update()
-Ask an update to the airzone hardware (airzone cloud don’t autopull data like current temperature)
-The update should be available in airzone cloud after 3 to 10 secs in average
+#### property current_temperature(: float)
+Return device current temperature in °C
 
 
-#### property brand()
-Return webserver brand
+#### property group(: <module 'AirzoneCloud.Group' from '/home/max13fr/www/AirzoneCloud/AirzoneCloud/Group.py'>)
+Get parent group
 
 
-#### property current_temperature()
-Return device current temperature
-
-
-#### property firmware()
-Return webserver firmware
-
-
-#### property heat_cold_mode()
-Return device current heat/cold mode
-
-
-#### property id()
+#### property id(: str)
 Return device id
 
 
-#### property installation()
-Get parent installation
+#### property is_connected(: bool)
+Return if the device is online (True) or offline (False)
 
 
-#### property is_on()
+#### property is_on(: bool)
 
-#### property mac()
-Return device mac
-
-
-#### property max_temperature()
-Return device maximal temperature
+#### property max_temperature(: float)
+Return device maximal temperature for current mode
 
 
-#### property max_temperature_cold()
-Return device max temperature limit in cold mode
+#### property min_temperature(: float)
+Return device minimal temperature for current mode
 
 
-#### property max_temperature_heat()
-Return device max temperature limit in heat mode
+#### property mode(: str)
+Return device current mode name (stop | auto | cooling | heating | ventilation | dehumidify | emergency-heating | air-heating | radiant-heating | combined-heating | air-cooling | radiant-cooling | combined-cooling)
 
 
-#### property min_temperature()
-Return device minimal temperature
+#### property mode_description(: str)
+Return device current mode description (pretty name to display)
 
 
-#### property min_temperature_cold()
-Return device min temperature limit in cold mode
+#### property mode_generic(: str)
+Return device current generic mode (stop | auto | cooling | heating | ventilation | dehumidify | emergency)
 
 
-#### property min_temperature_heat()
-Return device min temperature limit in heat mode
+#### property mode_id(: int)
+Return device current id mode (0┃1┃2┃3┃4┃5┃6┃7┃8┃9┃10┃11┃12)
 
 
-#### property mode()
-Return device current mode name
+#### property modes_availables(: list[str])
+Return device availables modes names list ([stop | auto | cooling | heating | ventilation | dehumidify | emergency-heating | air-heating | radiant-heating | combined-heating | air-cooling | radiant-cooling | combined-cooling, …])
 
 
-#### property mode_description()
-Return device current mode description
+#### property modes_availables_generics(: list[str])
+Return device availables modes generics list ([stop | auto | cooling | heating | ventilation | dehumidify | emergency, …])
 
 
-#### property mode_raw()
-Return device current raw mode (from API)
+#### property modes_availables_ids(: list[int])
+Return device availables modes list ([0┃1┃2┃3┃4┃5┃6┃7┃8┃9┃10┃11┃12, …])
 
 
-#### property name()
+#### property name(: str)
 Return device name
 
 
-#### property pin()
-Return device pin code
-
-
 #### refresh()
-Refresh current device data (call refresh_devices on parent AirzoneCloudDaikin)
+Refresh current device data (call refresh_devices on parent AirzoneCloud)
 
 
-#### set_mode(mode_name)
+#### set_mode(mode_name: str, auto_refresh: bool = True, delay_refresh: int = 1)
 Set mode of the device
 
 
-#### set_temperature(temperature)
-Set target_temperature for current heat/cold mode on this device
+#### set_temperature(temperature: float, auto_refresh: bool = True, delay_refresh: int = 1)
+Set target_temperature for current device in celcius
 
 
-#### property status()
-Return device status
+#### property step_temperature(: float)
+Return device step temperature (minimum increase/decrease step)
 
 
-#### property str_complete()
-
-#### property target_temperature()
-Return device target temperature
+#### property str_verbose(: str)
+More verbose description of current device
 
 
-#### property target_temperature_cold()
-Return device target temperature in cold mode
+#### property system_number(: str)
+Return device system_number
 
 
-#### property target_temperature_heat()
-Return device target temperature in heat mode
+#### property target_temperature(: float)
+Return device target temperature for current mode
 
 
-#### turn_off()
+#### turn_off(auto_refresh: bool = True, delay_refresh: int = 1)
 Turn device off
 
 
-#### turn_on()
+#### turn_on(auto_refresh: bool = True, delay_refresh: int = 1)
 Turn device on
 
-## AirzoneCloudDaikin.Installation module
+
+#### property type(: str)
+Return device type (az_zone┃aidoo)
 
 
-### class AirzoneCloudDaikin.Installation.Installation(api, data)
+#### property ws_id(: str)
+Return device webserver id (mac address)
+
+
+#### property zone_number(: str)
+Return device zone_number
+
+## AirzoneCloud.Group module
+
+
+### class AirzoneCloud.Group.Group(api: <module 'AirzoneCloud.AirzoneCloud' from '/home/max13fr/www/AirzoneCloud/AirzoneCloud/AirzoneCloud.py'>, installation: <module 'AirzoneCloud.Installation' from '/home/max13fr/www/AirzoneCloud/AirzoneCloud/Installation.py'>, data: dict)
 Bases: `object`
 
-Manage a Daikin AirzoneCloud installation
+Manage a AirzoneCloud group
 
 
-#### \__init__(api, data)
-Initialize self.  See help(type(self)) for accurate signature.
+#### \__init__(api: <module 'AirzoneCloud.AirzoneCloud' from '/home/max13fr/www/AirzoneCloud/AirzoneCloud/AirzoneCloud.py'>, installation: <module 'AirzoneCloud.Installation' from '/home/max13fr/www/AirzoneCloud/AirzoneCloud/Installation.py'>, data: dict)
+
+#### property devices(: list[Device])
+
+#### property id(: str)
+Return group id
 
 
-#### property devices()
-
-#### property gps_location()
-Return installation gps location : { latitude: …, longitude: … }
+#### property installation(: <module 'AirzoneCloud.Installation' from '/home/max13fr/www/AirzoneCloud/AirzoneCloud/Installation.py'>)
+Get parent installation
 
 
-#### property id()
-Return installation id
+#### property name(: str)
+Return group name
 
 
-#### property location()
-Return installation location
-
-
-#### property name()
-Return installation name
-
-
-#### refresh(refresh_devices=True)
-Refresh current installation data (call refresh_installations on parent AirzoneCloudDaikin)
+#### refresh(refresh_devices: bool = True)
+Refresh current group data (call refresh_groups on parent AirzoneCloud)
 
 
 #### refresh_devices()
-Refresh all devices of this installation
+Refresh all devices of this group
 
 
-#### property scenary()
-Return installation scenary
+#### property str_verbose(: str)
+More verbose description of current group
+
+## AirzoneCloud.Installation module
 
 
-#### property str_complete()
+### class AirzoneCloud.Installation.Installation(api: <module 'AirzoneCloud.AirzoneCloud' from '/home/max13fr/www/AirzoneCloud/AirzoneCloud/AirzoneCloud.py'>, data: dict)
+Bases: `object`
 
-#### property time_zone()
-Return the timezone
+Manage a AirzoneCloud installation
 
 
-#### property type()
-Return installation type
+#### \__init__(api: <module 'AirzoneCloud.AirzoneCloud' from '/home/max13fr/www/AirzoneCloud/AirzoneCloud/AirzoneCloud.py'>, data: dict)
 
-## AirzoneCloudDaikin.contants module
+#### property access_type(: str)
+Return installation access_type (admin┃advanced┃basic)
+
+
+#### property all_devices(: list[Device])
+Get all devices from all groups in the current installation
+
+
+#### property groups(: list[Group])
+Get all groups in the current installation
+
+
+#### property id(: str)
+Return installation id
+
+
+#### property location_id(: str)
+Return installation location id
+
+
+#### property name(: str)
+Return installation name
+
+
+#### refresh(refresh_groups: bool = True)
+Refresh current installation data (call refresh_installations on parent AirzoneCloud)
+
+
+#### refresh_groups()
+Refresh all groups of this installation
+
+
+#### property str_verbose(: str)
+More verbose description of current installation
+
+
+#### property ws_ids(: str)
+Return array of Webserver MAC addresses belonging to the installation
+
+## AirzoneCloud.constants module
 
 ## Module contents

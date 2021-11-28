@@ -1,4 +1,4 @@
 from .AirzoneCloud import AirzoneCloud
+from .Installation import Installation
+from .Group import Group
 from .Device import Device
-from .System import System
-from .Zone import Zone

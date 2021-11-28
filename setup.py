@@ -4,16 +4,16 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="AirzoneCloud",
-    version="0.5.0",
+    name="AirzoneCloudDaikin",
+    version="0.4.0",
     author="max13fr",
     author_email="max13fr@yozo.fr",
-    description="Python3 library for Airzone Cloud API",
+    description="Python3 library for Daikin (DKN) Airzone Cloud API",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/max13fr/AirzoneCloud",
-    keywords=["airzone", "airzonecloud", "api"],
-    packages=["AirzoneCloud"],
+    url="https://github.com/max13fr/AirzoneCloudDaikin",
+    keywords=["airzone", "airzonecloud", "daikin", "DKN", "api"],
+    packages=["AirzoneCloudDaikin"],
     install_requires=["requests"],
     classifiers=[
         "Development Status :: 4 - Beta",  # Chose either "3 - Alpha", "4 - Beta" or "5 - Production/Stable" as the current state of your package

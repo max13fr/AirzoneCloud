@@ -1,19 +1,17 @@
 #!/usr/bin/python3
 
 import logging
+from typing import Any, Union
 import requests
 import urllib
 import urllib.parse
 import json
+from pprint import pprint
 
-from .contants import (
-    API_LOGIN,
-    API_DEVICE_RELATIONS,
-    API_SYSTEMS,
-    API_ZONES,
-    API_EVENTS,
-)
+from .Installation import Installation
+from .Group import Group
 from .Device import Device
+from .constants import API_URL
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -21,166 +19,247 @@ _LOGGER = logging.getLogger(__name__)
 class AirzoneCloud:
     """Allow to connect to AirzoneCloud API"""
 
-    _session = None
-    _username = None
-    _password = None
-    _base_url = "https://www.airzonecloud.com"
-    _user_agent = "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 7 Build/MOB30X; wv) AppleWebKit/537.26 (KHTML, like Gecko) Version/4.0 Chrome/70.0.3538.110 Safari/537.36"
-    _token = None
-    _devices = []
+    _username: str = None
+    _password: str = None
+    _user_agent: str = "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 7 Build/MOB30X; wv) AppleWebKit/537.26 (KHTML, like Gecko) Version/4.0 Chrome/70.0.3538.110 Safari/537.36"
+    _session: requests.Session = None
+    _token: str = None
+    _installations: "list[Installation]" = []
 
-    def __init__(
-        self, username, password, user_agent=None, base_url=None,
-    ):
+    def __init__(self, username: str, password: str, user_agent: str = None,) -> None:
         """Initialize API connection"""
-        self._session = requests.Session()
         self._username = username
         self._password = password
         if user_agent is not None and isinstance(user_agent, str):
             self._user_agent = user_agent
-        if base_url is not None and isinstance(base_url, str):
-            self._base_url = base_url
+
+        # init new Session
+        self._session = requests.Session()
+
         # login
         self._login()
-        # load devices
-        self._load_devices()
+
+        # load installations
+        self._load_installations()
 
     #
     # getters
     #
 
     @property
-    def devices(self):
-        """Get devices list (same order as in app)"""
-        return self._devices
+    def installations(self) -> "list[Installation]":
+        """ Get installations list """
+        return self._installations
 
     @property
-    def all_systems(self):
-        """Get all systems from all devices (same order as in app)"""
+    def all_groups(self) -> "list[Group]":
+        """ Get all groups from all installations """
         result = []
-        for device in self.devices:
-            for system in device.systems:
-                result.append(system)
+        for installation in self.installations:
+            for group in installation.groups:
+                result.append(group)
         return result
 
     @property
-    def all_zones(self):
-        """Get all zones from all devices (same order as in app)"""
+    def all_devices(self) -> "list[Device]":
+        """ Get all devices from all installations """
         result = []
-        for device in self.devices:
-            for system in device.systems:
-                for zone in system.zones:
-                    result.append(zone)
+        for group in self.installations:
+            for device in group.all_devices:
+                result.append(device)
         return result
 
     #
     # Refresh
     #
 
-    def refresh_devices(self):
-        """Refresh devices"""
-        self._load_devices()
+    def refresh_installations(self) -> "AirzoneCloud":
+        """Refresh installations"""
+        self._load_installations()
+        return self
 
     #
     # private
     #
 
-    def _login(self):
-        """Login to AirzoneCloud and return token"""
+    def _login(self) -> str:
+        """Login to  AirzoneCloud and return token"""
 
         try:
-            url = "{}{}".format(self._base_url, API_LOGIN)
+            url = "{}/auth/login".format(API_URL)
             login_payload = {"email": self._username, "password": self._password}
             headers = {"User-Agent": self._user_agent}
-            response = self._session.post(
-                url, headers=headers, json=login_payload
-            ).json()
-            self._token = response.get("user").get("authentication_token")
-        except (RuntimeError, AttributeError):
+            response = self._session.post(url, headers=headers, json=login_payload)
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as err:
             raise Exception("Unable to login to AirzoneCloud") from None
+
+        self._token = response.json().get("token")
+        if not self._token:
+            raise Exception(
+                "Unable to login to AirzoneCloud, cannot get token from response : {}".format(
+                    response
+                )
+            )
 
         _LOGGER.info("Login success as {}".format(self._username))
 
         return self._token
 
-    def _load_devices(self):
-        """Load all devices for this account"""
-        current_devices = self._devices
-        self._devices = []
+    def _load_installations(self) -> "list[Installation]":
+        """Load all installations for this account"""
+        previous_installations = self._installations
+        self._installations = []
         try:
-            for device_relation in self._get_device_relations():
-                device_data = device_relation.get("device")
-                device = None
-                # search device in current_devices (if where are refreshing devices)
-                for current_device in current_devices:
-                    if current_device.id == device_data.get("id"):
-                        device = current_device
-                        device._set_data_refreshed(device_data)
+            for installation_data in self._api_get_installations_list():
+                installation = None
+                # search installation in previous_installations (if where are refreshing installations)
+                for previous_installation in previous_installations:
+                    if previous_installation.id == installation_data.get(
+                        "installation_id"
+                    ):
+                        installation = previous_installation
+                        installation._set_data_refreshed(installation_data)
                         break
-                # device not found => instance new device
-                if device is None:
-                    device = Device(self, device_data)
-                self._devices.append(device)
+                # installation not found => instance new installation
+                if installation is None:
+                    installation = Installation(self, installation_data)
+                self._installations.append(installation)
         except RuntimeError:
-            raise Exception("Unable to load devices from AirzoneCloud")
-        return self._devices
+            raise Exception("Unable to load installations from AirzoneCloud")
+        return self._installations
 
-    def _get_device_relations(self):
-        """Http GET to load devices"""
-        _LOGGER.debug("get_device_relations()")
-        return self._get(API_DEVICE_RELATIONS).get("device_relations")
+    #
+    # API calls
+    #
 
-    def _get_systems(self, device_id):
-        """Http GET to load systems"""
-        _LOGGER.debug("get_systems(device_id={})".format(device_id))
-        return self._get(API_SYSTEMS, {"device_id": device_id}).get("systems")
+    def _api_get_installations_list(self) -> list:
+        """ Http GET to load installations relations"""
+        _LOGGER.debug("_api_get_installations_list()")
+        # TODO manage pagination (10 installations max currently)
+        return self._api_get("/installations").get("installations", [])
 
-    def _get_zones(self, system_id):
-        """Http GET to load Zones"""
-        _LOGGER.debug("get_zones(system_id={})".format(system_id))
-        return self._get(API_ZONES, {"system_id": system_id}).get("zones")
+    def _api_get_installation_groups_list(self, installation_id: str) -> list:
+        """ Http GET to load groups in a specific installation """
+        _LOGGER.debug(
+            "_api_get_installation_groups_list(installation_id={})".format(
+                installation_id
+            )
+        )
+        return self._api_get("/installations/{}".format(installation_id)).get(
+            "groups", []
+        )
 
-    def _send_event(self, payload):
-        """Http POST to send an event"""
-        _LOGGER.debug("Send event with payload: {}".format(json.dumps(payload)))
-        try:
-            result = self._post(API_EVENTS, payload)
-            _LOGGER.debug("Result event: {}".format(json.dumps(result)))
-            return result
-        except RuntimeError:
-            _LOGGER.error("Unable to send event to AirzoneCloud")
-            return None
+    def _api_get_device_state(self, device_id: str, installation_id: str) -> dict:
+        """ Http GET to load state of a specific device """
+        _LOGGER.debug(
+            "_api_get_device_state(device_id={}, installation_id={})".format(
+                device_id, installation_id
+            )
+        )
+        return self._api_get(
+            "/devices/{}/status".format(device_id),
+            {"installation_id": installation_id},
+        )
 
-    def _get(self, api_endpoint, params={}):
+    def _api_get_device_config(
+        self, device_id: str, installation_id: str, type: str = "all"
+    ) -> dict:
+        """ Http GET to load config of a specific device """
+        _LOGGER.debug(
+            "_api_get_device_config(device_id={}, installation_id={}, type={})".format(
+                device_id, installation_id, type
+            )
+        )
+        return self._api_get(
+            "/devices/{}/config".format(device_id),
+            {"installation_id": installation_id, "type": type},
+        )
+
+    def _api_patch_device(
+        self,
+        device_id: str,
+        installation_id: str,
+        param: str,
+        value: Union[str, int, float, bool],
+        opts: dict = {},
+    ) -> Any:
+        """ Http PATCH to change a device parameter (state or config) """
+        _LOGGER.debug(
+            "_api_patch_device(device_id={}, installation_id={}, param={}, value={}, opts={})".format(
+                device_id, installation_id, param, value, opts
+            )
+        )
+        return self._api_patch(
+            "/devices/{}".format(device_id),
+            {
+                "installation_id": installation_id,
+                "param": param,
+                "value": value,
+                "opts": opts,
+            },
+        )
+
+    def _api_get(self, api_endpoint: str, params: dict = {}) -> Any:
         """Do a http GET request on an api endpoint"""
+
         params["format"] = "json"
 
-        return self._request(method="GET", api_endpoint=api_endpoint, params=params)
+        return self._api_request(method="GET", api_endpoint=api_endpoint, params=params)
 
-    def _post(self, api_endpoint, payload={}):
+    def _api_post(self, api_endpoint: str, payload: dict = {}) -> Any:
         """Do a http POST request on an api endpoint"""
+
         headers = {
-            "X-Requested-With": "XMLHttpRequest",
             "Content-Type": "application/json;charset=UTF-8",
-            "Accept": "application/json, text/plain, */*",
+            "Accept": "application/json",
         }
 
-        return self._request(
+        return self._api_request(
             method="POST", api_endpoint=api_endpoint, headers=headers, json=payload
         )
 
-    def _request(
-        self, method, api_endpoint, params={}, headers={}, json=None, autoreconnect=True
-    ):
-        # generate url with auth
-        params["user_email"] = self._username
-        params["user_token"] = self._token
-        url = "{}{}/?{}".format(
-            self._base_url, api_endpoint, urllib.parse.urlencode(params)
+    def _api_put(self, api_endpoint: str, payload: dict = {}) -> Any:
+        """Do a http PUT request on an api endpoint"""
+
+        headers = {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Accept": "application/json",
+        }
+
+        return self._api_request(
+            method="PUT", api_endpoint=api_endpoint, headers=headers, json=payload
         )
 
-        # set user agent
+    def _api_patch(self, api_endpoint: str, payload: dict = {}) -> Any:
+        """Do a http PATCH request on an api endpoint"""
+
+        headers = {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Accept": "application/json",
+        }
+
+        return self._api_request(
+            method="PATCH", api_endpoint=api_endpoint, headers=headers, json=payload
+        )
+
+    def _api_request(
+        self,
+        method: str,
+        api_endpoint: str,
+        params: dict = {},
+        headers: dict = {},
+        json: dict = None,
+        autoreconnect: bool = True,
+    ) -> Any:
+        """Do a http generic request on an api endpoint"""
+
+        # set headers
+        headers["Authorization"] = "Bearer {}".format(self._token)
         headers["User-Agent"] = self._user_agent
+
+        # generate url
+        url = "{}{}/?{}".format(API_URL, api_endpoint, urllib.parse.urlencode(params))
 
         # make call
         call = self._session.request(method=method, url=url, headers=headers, json=json)
@@ -195,7 +274,7 @@ class AirzoneCloud:
             self._login()
 
             # retry get without autoreconnect (to avoid infinite loop)
-            return self._request(
+            return self._api_request(
                 method=method,
                 api_endpoint=api_endpoint,
                 params=params,
@@ -204,7 +283,18 @@ class AirzoneCloud:
                 autoreconnect=False,
             )
 
-        # raise other error if needed
-        call.raise_for_status()
+        print(call.text)
 
-        return call.json()
+        # raise other error if needed
+        try:
+            call.raise_for_status()
+        except requests.exceptions.HTTPError as err:
+            _LOGGER.error(call.text)
+            raise err
+
+        # decode json only if response is not empty
+        if len(call.text):
+            return call.json()
+
+        return None
+

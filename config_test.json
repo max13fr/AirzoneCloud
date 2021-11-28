@@ -1,0 +1,7 @@
+{
+    "username": "changeme@example.com",
+    "password": "changeme",
+    "log_level": "INFO",
+    "display_api_token": false,
+    "display_device_properties": false
+}

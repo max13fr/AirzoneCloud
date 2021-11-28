@@ -7,10 +7,10 @@
   - [Usage](#usage)
     - [Install](#install)
     - [Start API](#start-api)
-    - [Get device status](#get-device-status)
-    - [Get system status](#get-system-status)
-    - [Get all zones status (on all devices / systems)](#get-all-zones-status-on-all-devices--systems)
-    - [Control a specific zone](#control-a-specific-zone)
+    - [Get installations](#get-installations)
+    - [Get devices from installations](#get-devices-from-installations)
+    - [Get all devices shortcut](#get-all-devices-shortcut)
+    - [Control a device](#control-a-device)
     - [HVAC mode](#hvac-mode)
       - [Available modes](#available-modes)
       - [Set HVAC mode on a system (and its sub-zones)](#set-hvac-mode-on-a-system-and-its-sub-zones)
@@ -25,14 +25,16 @@ Allow to communicate easily with Airzone Cloud to retrieve information or to sen
 
 This library manage the main Airzone Cloud API (try to connect to [www.airzonecloud.com](https://www.airzonecloud.com) to be sure).
 
-If you are looking for the specific Airzone Cloud API for Daikin (try to connect to [dkn.airzonecloud.com](https://dkn.airzonecloud.com)), you should use this package : [AirzoneCloudDaikin](https://github.com/max13fr/AirzoneCloudDaikin)
+Official API documentation is available here : https://developers.airzonecloud.com/docs/web-api/
 
 ### Module classes
 
-* **AirzoneCloud** : represent your AirzoneCloud account. Contains a list of your **devices** :
-  * **Device** : represent one of your Airzone webserver registered. Contains a list of its **systems** :
-    * **System** : represent your climate equipment (Mitsubishi, Daikin, ...). Contains a list of its **zones** :
-      * **Zone** : represent a zone to control
+- **AirzoneCloud** : represent your AirzoneCloud account. Contains a list of your **installations** :
+  - **Installation**: represent one of your installation (like your home, an office, ...). Contains a list of its **groups** :
+    - **Group** : represent a group of **devices** in the installation
+      - **Device** : represent your thermostat to control
+
+![Airzonecloud tree elements](airzonecloud_tree_elements.png)
 
 ## Usage
 
@@ -49,13 +51,13 @@ from AirzoneCloud import AirzoneCloud
 api = AirzoneCloud("email@domain.com", "password")
 ```
 
-### Get device status
+### Get installations
 
 ```python
-for device in api.devices:
+for installation in api.installations:
     print(
-        "Device name={}, status={}, id={}, mac={}, pin={}".format(
-            device.name, device.status, device.id, device.mac, device.pin
+        "Installation(name={}, type={}, scenary={}, id={})".format(
+            installation.name, installation.type, installation.scenary, installation.id
         )
     )
 ```
@@ -63,20 +65,46 @@ for device in api.devices:
 Output :
 
 <pre>
-Device name=Home, status=activated, id=5bc8ae0c4149526af90c0000, mac=AA:BB:CC:DD:EE:FF, pin=1234
+Installation(name=My home, type=home, scenary=occupied, id=5d592c14646b6d798ccc2aaa)
 </pre>
 
-### Get system status
+### Get devices from installations
 
 ```python
-for system in api.devices[0].systems:
+for installation in api.installations:
+    for device in installation.devices:
+        print(
+            "Device(name={}, is_on={}, mode={}, current_temp={}, target_temp={}, id={}, mac={})".format(
+                device.name,
+                device.is_on,
+                device.mode,
+                device.current_temperature,
+                device.target_temperature,
+                device.id,
+                device.mac,
+            )
+        )
+```
+
+Output :
+
+<pre>
+Device(name=Dknwserver, is_on=False, mode=cool, current_temp=25.0, target_temp=26.0, id=5ab1875a651241708814575681, mac=AA:BB:CC:DD:EE:FF)
+</pre>
+
+### Get all devices shortcut
+
+```python
+for device in api.all_devices:
     print(
-        "System name={}, mode={}, eco={}, velocity={}, airflow={}".format(
-            system.name,
-            system.mode,
-            system.eco,
-            system.velocity,
-            system.airflow,
+        "Device(name={}, is_on={}, mode={}, current_temp={}, target_temp={}, id={}, mac={})".format(
+            device.name,
+            device.is_on,
+            device.mode,
+            device.current_temperature,
+            device.target_temperature,
+            device.id,
+            device.mac,
         )
     )
 ```
@@ -84,87 +112,69 @@ for system in api.devices[0].systems:
 Output :
 
 <pre>
-System name=Home, mode=heat-both, eco=eco-a, velocity=None, airflow=None
+Device(name=Dknwserver, is_on=False, mode=cool, current_temp=25.0, target_temp=26.0, id=5ab1875a651241708814575681, mac=AA:BB:CC:DD:EE:FF)
 </pre>
 
-### Get all zones status (on all devices / systems)
+### Control a device
 
 ```python
-for zone in api.all_zones:
-    print(
-        "Zone name={}, is_on={}, mode={}, current_temperature={}, target_temperature={}".format(
-            zone.name,
-            zone.is_on,
-            zone.mode,
-            zone.current_temperature,
-            zone.target_temperature,
-        )
-    )
-```
+device = api.all_devices[0]
+print(device)
 
-Output :
-
-<pre>
-Zone name=Baby bedroom, is_on=False, mode=heat-both, current_temperature=20.4, target_temperature=19.5
-Zone name=Parents bedroom, is_on=False, mode=heat-both, current_temperature=21.1, target_temperature=17.0
-Zone name=Living room, is_on=True, mode=heat-both, current_temperature=21.4, target_temperature=21.5
-Zone name=Kitchen, is_on=False, mode=heat-both, current_temperature=21.2, target_temperature=19.0
-</pre>
-
-### Control a specific zone
-
-```python
-zone = api.all_zones[2]
-print(zone)
-
-# start zone
-zone.turn_on()
+# start device
+device.turn_on()
 
 # set temperature
-zone.set_temperature(18.5)
+device.set_temperature(26)
 
-print(zone)
+print(device)
+
+# stopping device
+device.turn_off()
+
+print(device)
 ```
 
 Output :
 
 <pre>
-Zone(name=Living room, is_on=False, mode=heat-both, current_temp=21.6, target_temp=21.0)
-Zone(name=Living room, is_on=True, mode=heat-both, current_temp=21.6, target_temp=18.5)
+Device(name=Dknwserver, is_on=False, mode=cool, current_temp=25.0, target_temp=30.0)
+Device(name=Dknwserver, is_on=True, mode=cool, current_temp=25.0, target_temp=26.0)
+Device(name=Dknwserver, is_on=False, mode=cool, current_temp=25.0, target_temp=26.0)
 </pre>
 
 ### HVAC mode
 
 #### Available modes
 
-* **stop** : Stop
-* **ventilate** : Ventilate
-* **dehumidify** : Dry
-* **heat-air** : Air heating
-* **heat-radiant** : Radiant heating
-* **heat-both** : Combined heating
-* **cool-air** : Air cooling
-* **cool-radiant** : Radiant cooling
-* **cool-both** : Combined cooling
+- **cool** : Cooling mode
+- **heat** : Heating mode
+- **ventilate** : Ventilation
+- **dehumidify** : Dry
+- **heat-cold-auto** : Auto heat/cold mode
 
 #### Set HVAC mode on a system (and its sub-zones)
 
 ```python
-system = api.devices[0].systems[0]
-print(system)
+device = api.all_devices[0]
+print(device)
 
-# set mode to heat-both
-system.set_mode("heat-both")
+# set mode to heat
+device.set_mode("heat")
 
-print(system)
+print(device)
 ```
 
 Output :
 
 <pre>
-System(name=Home, mode=stop, eco=eco-a, velocity=None, airflow=None)
-System(name=Home, mode=heat-both, eco=eco-a, velocity=None, airflow=None)
+Device(name=Dknwserver, is_on=False, mode=cool, current_temp=25.0, target_temp=26.0)
+Device(name=Dknwserver, is_on=False, mode=heat, current_temp=25.0, target_temp=23.0)
 </pre>
+
+> :warning: climate equipment has 2 consigns : one for heat & one of cold.
+> Its visible in the previous example, the target temperature has change from 26 to 23 just by changing the mode from cool to heat.
+> So don't forget to do your set_temperature() AFTER the set_mode() and not before
 
 ## API doc
 
@@ -176,8 +186,8 @@ System(name=Home, mode=heat-both, eco=eco-a, velocity=None, airflow=None)
 AirzoneCloud(username, password, user_agent=None, base_url=None)
 ```
 
-* **username** : you're username used to connect on Airzone Cloud website or app
-* **password** : you're password used to connect on Airzone Cloud website or app
-* **user_agent** : allow to change default user agent if set
-* **base_url** : allow to change base url of the Airzone Cloud API if set
-  * default value : _https://www.airzonecloud.com_
+- **username** : you're username used to connect on Airzone Cloud website or app
+- **password** : you're password used to connect on Airzone Cloud website or app
+- **user_agent** : allow to change default user agent if set
+- **base_url** : allow to change base url of the Airzone Cloud API if set
+  - default value : _https://dkn.airzonecloud.com_

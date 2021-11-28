@@ -11,14 +11,17 @@ api = AirzoneCloud(config.get("email"), config.get("password"))
 if config.get("display_api_token", False):
     print("API token = ", api._token, "\n")
 
+print()
+
 for installation in api.installations:
     print(installation.str_verbose)
     for group in installation.groups:
-        print(group.str_verbose)
+        print("   " + group.str_verbose)
         for device in group.devices:
-            print(device.str_verbose)
+            print("     " + device.str_verbose)
             if config.get("display_device_properties", False):
-                print(device.str_all_properties)
+                for key, val in device.all_properties.items():
+                    print("       - {} = {}".format(key, val))
 
             # if device.name == "Salon":
             #     # device.turn_on(auto_refresh=False).set_temperature(20)

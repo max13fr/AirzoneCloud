@@ -5,8 +5,6 @@ from typing import Any, Union
 import requests
 import urllib
 import urllib.parse
-import json
-from pprint import pprint
 
 from .Installation import Installation
 from .Group import Group
@@ -93,7 +91,7 @@ class AirzoneCloud:
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
             raise Exception(
-                "Unable to login to AirzoneCloud for email {}".format(self._email)
+                "Unable to login to AirzoneCloud with email {}".format(self._email)
             ) from None
 
         self._token = response.json().get("token")
@@ -284,8 +282,6 @@ class AirzoneCloud:
                 json=json,
                 autoreconnect=False,
             )
-
-        print(call.text)
 
         # raise other error if needed
         try:

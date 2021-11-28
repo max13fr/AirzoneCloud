@@ -53,8 +53,8 @@ class Device:
         )
 
     @property
-    def str_all_properties(self) -> str:
-        result = ""
+    def all_properties(self) -> dict:
+        result = {}
         for prop in [
             "id",
             "name",
@@ -77,8 +77,8 @@ class Device:
             "max_temperature",
             "step_temperature",
         ]:
-            result += "- {} = {}\n".format(prop, getattr(self, prop))
-        return result.rstrip()
+            result[prop] = getattr(self, prop)
+        return result
 
     #
     # getters

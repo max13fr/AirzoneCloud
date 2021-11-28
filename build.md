@@ -41,5 +41,5 @@ https://stackoverflow.com/a/59128670
 
 ```bash
 python setup.py sdist
-twine upload dist/AirzoneCloud-X.X.X.tar.gz
+twine upload --skip-existing dist/*
 ```

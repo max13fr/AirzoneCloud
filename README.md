@@ -7,15 +7,18 @@
   - [Usage](#usage)
     - [Install](#install)
     - [Start API](#start-api)
-- [XXX following not update to date](#xxx-following-not-update-to-date)
     - [Get installations](#get-installations)
-    - [Get devices from installations](#get-devices-from-installations)
-    - [Get all devices shortcut](#get-all-devices-shortcut)
+    - [Get installations](#get-installations-1)
+    - [Get groups for each installation](#get-groups-for-each-installation)
+    - [Get devices for each grou of each installation](#get-devices-for-each-grou-of-each-installation)
+    - [Get all devices from all installations shortcut](#get-all-devices-from-all-installations-shortcut)
     - [Control a device](#control-a-device)
+- [XXX following not update to date](#xxx-following-not-update-to-date)
     - [HVAC mode](#hvac-mode)
       - [Available modes](#available-modes)
-      - [Set HVAC mode on a system (and its sub-zones)](#set-hvac-mode-on-a-system-and-its-sub-zones)
-  - [API doc](#api-doc)
+      - [List supported modes for each devices](#list-supported-modes-for-each-devices)
+      - [Set HVAC mode on a master thermostat device (and all linked thermostats)](#set-hvac-mode-on-a-master-thermostat-device-and-all-linked-thermostats)
+  - [API documentation](#api-documentation)
 
 ## Presentation
 
@@ -51,15 +54,13 @@ from AirzoneCloud import AirzoneCloud
 api = AirzoneCloud("email@domain.com", "password")
 ```
 
-# XXX following not update to date
-
 ### Get installations
 
 ```python
 for installation in api.installations:
     print(
-        "Installation(name={}, type={}, scenary={}, id={})".format(
-            installation.name, installation.type, installation.scenary, installation.id
+        "Installation(name={}, access_type={}, ws_ids=[{}], id={})".format(
+            installation.name, installation.access_type, ", ".join(installation.ws_ids), installation.id
         )
     )
 ```
@@ -67,23 +68,35 @@ for installation in api.installations:
 Output :
 
 <pre>
-Installation(name=My home, type=home, scenary=occupied, id=5d592c14646b6d798ccc2aaa)
+Installation(name=Home, access_type=admin, ws_ids=[AA:BB:CC:DD:EE:FF], id=60f5cb990123456789abdcef)
 </pre>
 
-### Get devices from installations
+### Get installations
 
 ```python
 for installation in api.installations:
-    for device in installation.devices:
+    print(
+        "Installation(name={}, access_type={}, ws_ids=[{}], id={})".format(
+            installation.name, installation.access_type, ", ".join(installation.ws_ids), installation.id
+        )
+    )
+```
+
+Output :
+
+<pre>
+Installation(name=Home, access_type=admin, ws_ids=[AA:BB:CC:DD:EE:FF], id=60f5cb990123456789abdcef)
+</pre>
+
+### Get groups for each installation
+
+```python
+for installation in api.installations:
+    print(installation)
+    for group in installation.groups:
         print(
-            "Device(name={}, is_on={}, mode={}, current_temp={}, target_temp={}, id={}, mac={})".format(
-                device.name,
-                device.is_on,
-                device.mode,
-                device.current_temperature,
-                device.target_temperature,
-                device.id,
-                device.mac,
+            "  Group(name={}, installation={}, id={})".format(
+                group.name, group.installation.name, group.id
             )
         )
 ```
@@ -91,22 +104,54 @@ for installation in api.installations:
 Output :
 
 <pre>
-Device(name=Dknwserver, is_on=False, mode=cool, current_temp=25.0, target_temp=26.0, id=5ab1875a651241708814575681, mac=AA:BB:CC:DD:EE:FF)
+Installation(name=Home)
+  Group(name=System 1, installation=Home, id=60f5cb990123456789abdce0)
 </pre>
 
-### Get all devices shortcut
+### Get devices for each grou of each installation
+
+```python
+for installation in api.installations:
+    print(installation)
+    for group in installation.groups:
+        print("  " + str(group))
+        for device in group.devices:
+            print(
+                "    Device(name={}, is_connected={}, is_on={}, mode={}, current_temp={}, target_temp={}, id={}, ws_id={})".format(
+                    device.name,
+                    device.is_connected,
+                    device.is_on,
+                    device.mode,
+                    device.current_temperature,
+                    device.target_temperature,
+                    device.id,
+                    device.ws_id,
+                )
+            )
+```
+
+Output :
+
+<pre>
+Installation(name=Home)
+  Group(name=System 1, installation=Home)
+    Device(name=Salon, is_connected=True, is_on=True, mode=heating, current_temp=20.9, target_temp=20.0, id=60f5cb990123456789abdce1, ws_id=AA:BB:CC:DD:EE:FF)
+    Device(name=Ch parents, is_connected=True, is_on=False, mode=heating, current_temp=17.2, target_temp=18.0, id=60f5cb990123456789abdce2, ws_id=AA:BB:CC:DD:EE:FF)
+    Device(name=Ch bebe, is_connected=True, is_on=False, mode=heating, current_temp=18.6, target_temp=19.5, id=60f5cb990123456789abdce3, ws_id=AA:BB:CC:DD:EE:FF)
+</pre>
+
+### Get all devices from all installations shortcut
 
 ```python
 for device in api.all_devices:
     print(
-        "Device(name={}, is_on={}, mode={}, current_temp={}, target_temp={}, id={}, mac={})".format(
+        "Device(name={}, is_on={}, mode={}, current_temp={}, target_temp={}, id={})".format(
             device.name,
             device.is_on,
             device.mode,
             device.current_temperature,
             device.target_temperature,
             device.id,
-            device.mac,
         )
     )
 ```
@@ -114,70 +159,101 @@ for device in api.all_devices:
 Output :
 
 <pre>
-Device(name=Dknwserver, is_on=False, mode=cool, current_temp=25.0, target_temp=26.0, id=5ab1875a651241708814575681, mac=AA:BB:CC:DD:EE:FF)
+Device(name=Salon, is_connected=True, is_on=True, mode=heating, current_temp=20.9, target_temp=20.0, id=60f5cb990123456789abdce1, ws_id=AA:BB:CC:DD:EE:FF)
+Device(name=Ch parents, is_connected=True, is_on=False, mode=heating, current_temp=17.2, target_temp=18.0, id=60f5cb990123456789abdce2, ws_id=AA:BB:CC:DD:EE:FF)
+Device(name=Ch bebe, is_connected=True, is_on=False, mode=heating, current_temp=18.6, target_temp=19.5, id=60f5cb990123456789abdce3, ws_id=AA:BB:CC:DD:EE:FF)
 </pre>
 
 ### Control a device
 
+All actions by default are waiting 1 second then refresh the device.
+You can disable this behavior by adding auto_refresh=False.
+
 ```python
+# get first device
 device = api.all_devices[0]
 print(device)
 
-# start device
-device.turn_on()
-
-# set temperature
-device.set_temperature(26)
-
+# start device & set temperature
+device.turn_on(auto_refresh=False).set_temperature(22)
 print(device)
 
 # stopping device
 device.turn_off()
-
 print(device)
 ```
 
 Output :
 
 <pre>
-Device(name=Dknwserver, is_on=False, mode=cool, current_temp=25.0, target_temp=30.0)
-Device(name=Dknwserver, is_on=True, mode=cool, current_temp=25.0, target_temp=26.0)
-Device(name=Dknwserver, is_on=False, mode=cool, current_temp=25.0, target_temp=26.0)
+Device(name=Salon, is_connected=True, is_on=False, mode=heating, current_temp=20.8, target_temp=20.0)
+Device(name=Salon, is_connected=True, is_on=True, mode=heating, current_temp=20.8, target_temp=22.0)
+Device(name=Salon, is_connected=True, is_on=False, mode=heating, current_temp=20.8, target_temp=22.0)
 </pre>
+
+# XXX following not update to date
 
 ### HVAC mode
 
 #### Available modes
 
-- **cool** : Cooling mode
-- **heat** : Heating mode
-- **ventilate** : Ventilation
-- **dehumidify** : Dry
-- **heat-cold-auto** : Auto heat/cold mode
+- **stop** : Stop mode
+- **auto** : Automatic mode
+- **cooling** : Cooling mode
+- **heating** : Heating mode
+- **ventilation** : Ventilation mode
+- **dehumidify** : Dehumidifier / Dry mode
+- **emergency-heating** : Emergency heat mode
+- **air-heating** : Heat air mode (only compatible systems)
+- **radiant-heating** : Heat radiant mode (only compatible systems)
+- **combined-heating** : Heat combined mode (only compatible systems)
+- **air-cooling** : Cooling air mode (only compatible systems)
+- **radiant-cooling** : Cooling radiant mode (only compatible systems)
+- **combined-cooling** : Cooling combined mode (only compatible systems)
 
-#### Set HVAC mode on a system (and its sub-zones)
+Only master thermostat device can update the mode.
+
+#### List supported modes for each devices
+
+```python
+for device in api.all_devices:
+    print(
+        "Device(name={}, mode={}, modes_availables={})".format(
+            device.name,
+            device.mode,
+            device.modes_availables,
+        )
+    )
+```
+
+Output :
+
+<pre>
+Device(name=Salon, mode=heating, modes_availables=['cooling', 'heating', 'ventilation', 'dehumidify', 'stop'])
+Device(name=Ch parents, mode=heating, modes_availables=[])
+Device(name=Ch bebe, mode=heating, modes_availables=[])
+</pre>
+
+If modes_availables is an empty list, your device is not the master thermostat.
+
+#### Set HVAC mode on a master thermostat device (and all linked thermostats)
 
 ```python
 device = api.all_devices[0]
 print(device)
 
-# set mode to heat
-device.set_mode("heat")
-
+# set mode to cooling
+device.set_mode("cooling")
 print(device)
 ```
 
 Output :
 
 <pre>
-Device(name=Dknwserver, is_on=False, mode=cool, current_temp=25.0, target_temp=26.0)
-Device(name=Dknwserver, is_on=False, mode=heat, current_temp=25.0, target_temp=23.0)
+Device(name=Salon, is_connected=True, is_on=True, mode=heating, current_temp=20.8, target_temp=20.0)
+Device(name=Salon, is_connected=True, is_on=True, mode=cooling, current_temp=20.8, target_temp=20.0)
 </pre>
 
-> :warning: climate equipment has 2 consigns : one for heat & one of cold.
-> Its visible in the previous example, the target temperature has change from 26 to 23 just by changing the mode from cool to heat.
-> So don't forget to do your set_temperature() AFTER the set_mode() and not before
-
-## API doc
+## API documentation
 
 [API full doc](API.md)

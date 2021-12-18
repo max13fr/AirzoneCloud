@@ -63,7 +63,13 @@ Return device id
 Return if the device is online (True) or offline (False)
 
 
+#### property is_master(: bool)
+Return True if the device is a master thermostat (allowed to update the mode of all devices)
+
+
 #### property is_on(: bool)
+Return True if the device is on
+
 
 #### property max_temperature(: float)
 Return device maximal temperature for current mode
@@ -106,7 +112,7 @@ Return device name
 
 
 #### refresh()
-Refresh current device data (call refresh_devices on parent AirzoneCloud)
+Refresh current device states
 
 
 #### set_mode(mode_name: str, auto_refresh: bool = True, delay_refresh: int = 1)
@@ -114,7 +120,7 @@ Set mode of the device
 
 
 #### set_temperature(temperature: float, auto_refresh: bool = True, delay_refresh: int = 1)
-Set target_temperature for current device in celcius
+Set target_temperature for current device (degrees celsius)
 
 
 #### property step_temperature(: float)
@@ -177,16 +183,28 @@ Get parent installation
 Return group name
 
 
-#### refresh(refresh_devices: bool = True)
-Refresh current group data (call refresh_groups on parent AirzoneCloud)
-
-
 #### refresh_devices()
 Refresh all devices of this group
 
 
+#### set_mode(mode_name: str, auto_refresh: bool = True, delay_refresh: int = 1)
+Set mode of the all devices in the group
+
+
+#### set_temperature(temperature: float, auto_refresh: bool = True, delay_refresh: int = 1)
+Set target_temperature for current all devices in the group (in degrees celsius)
+
+
 #### property str_verbose(: str)
 More verbose description of current group
+
+
+#### turn_off(auto_refresh: bool = True, delay_refresh: int = 1)
+Turn off all devices in the group
+
+
+#### turn_on(auto_refresh: bool = True, delay_refresh: int = 1)
+Turn on all devices in the group
 
 ## AirzoneCloud.Installation module
 
@@ -223,16 +241,28 @@ Return installation location id
 Return installation name
 
 
-#### refresh(refresh_groups: bool = True)
-Refresh current installation data (call refresh_installations on parent AirzoneCloud)
-
-
 #### refresh_groups()
 Refresh all groups of this installation
 
 
+#### set_mode(mode_name: str, auto_refresh: bool = True, delay_refresh: int = 1)
+Set mode of the all devices in the installation
+
+
+#### set_temperature(temperature: float, auto_refresh: bool = True, delay_refresh: int = 1)
+Set target_temperature for current all devices in the installation (in degrees celsius)
+
+
 #### property str_verbose(: str)
 More verbose description of current installation
+
+
+#### turn_off(auto_refresh: bool = True, delay_refresh: int = 1)
+Turn off all devices in the installation
+
+
+#### turn_on(auto_refresh: bool = True, delay_refresh: int = 1)
+Turn on all devices in the installation
 
 
 #### property ws_ids(: str)

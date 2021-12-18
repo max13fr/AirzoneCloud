@@ -18,6 +18,9 @@
       - [List supported modes for each devices](#list-supported-modes-for-each-devices)
       - [Set HVAC mode on a master thermostat device (and all linked thermostats)](#set-hvac-mode-on-a-master-thermostat-device-and-all-linked-thermostats)
   - [API documentation](#api-documentation)
+  - [Tests](#tests)
+    - [Update configuration in config_test.json](#update-configuration-in-config_testjson)
+    - [Run test script](#run-test-script)
 
 ## Presentation
 
@@ -254,3 +257,20 @@ Device(name=Salon, is_connected=True, is_on=True, mode=cooling, current_temp=20.
 ## API documentation
 
 [API full doc](API.md)
+
+## Tests
+
+### Update configuration in config_test.json
+
+- **email** : used to log-in to you AirzoneCloud account (default to *changeme@example.com*)
+- **password** : used to log-in to you AirzoneCloud account (default to *changeme*)
+- **log_level** : minimum level of log to display : DEBUG | INFO | WARNING | ERROR | CRITICIAL (default to *INFO*)
+- **display_device_properties** : display all properties for each device (default to *true*).
+- **display_api_token** : ask to display token used to connect to the AirzoneCloud API (default to *false*). Useful for https://developers.airzonecloud.com/docs/web-api/
+- **refresh_before_display** : ask to call all refresh functions before displaying for test purpose (default to *false*).
+
+### Run test script
+
+```bash
+./test.py
+```

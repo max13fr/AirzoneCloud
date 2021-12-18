@@ -1,6 +1,8 @@
 import logging
-
+import time
+from typing import Union
 from . import AirzoneCloud, Installation
+from .constants import MODES_CONVERTER
 from .Device import Device
 
 _LOGGER = logging.getLogger(__name__)
@@ -55,6 +57,70 @@ class Group:
         return self._data.get("name")
 
     #
+    # setters
+    #
+
+    def turn_on(self, auto_refresh: bool = True, delay_refresh: int = 1) -> "Group":
+        """ Turn on all devices in the group """
+        _LOGGER.info("call turn_on() on {}".format(self.str_verbose))
+
+        for device in self.devices:
+            device.turn_on(auto_refresh=False)
+
+        if auto_refresh:
+            time.sleep(delay_refresh)  # wait data refresh by airzone
+            self.refresh()
+
+        return self
+
+    def turn_off(self, auto_refresh: bool = True, delay_refresh: int = 1) -> "Group":
+        """ Turn off all devices in the group """
+        _LOGGER.info("call turn_off() on {}".format(self.str_verbose))
+
+        for device in self.devices:
+            device.turn_off(auto_refresh=False)
+
+        if auto_refresh:
+            time.sleep(delay_refresh)  # wait data refresh by airzone
+            self.refresh()
+
+        return self
+
+    def set_temperature(
+        self, temperature: float, auto_refresh: bool = True, delay_refresh: int = 1
+    ) -> "Group":
+        """ Set target_temperature for current all devices in the group (in degrees celsius) """
+        _LOGGER.info(
+            "call set_temperature({}) on {}".format(temperature, self.str_verbose)
+        )
+
+        for device in self.devices:
+            if device.is_master:
+                device.set_temperature(temperature=temperature, auto_refresh=False)
+
+        if auto_refresh:
+            time.sleep(delay_refresh)  # wait data refresh by airzone
+            self.refresh()
+
+        return self
+
+    def set_mode(
+        self, mode_name: str, auto_refresh: bool = True, delay_refresh: int = 1
+    ) -> "Group":
+        """ Set mode of the all devices in the group """
+        _LOGGER.info("call set_mode({}) on {}".format(mode_name, self.str_verbose))
+
+        for device in self.devices:
+            if device.is_master:
+                device.set_mode(mode_name=mode_name, auto_refresh=False)
+
+        if auto_refresh:
+            time.sleep(delay_refresh)  # wait data refresh by airzone
+            self.refresh()
+
+        return self
+
+    #
     # parent installation
     #
 
@@ -75,17 +141,10 @@ class Group:
     # Refresh
     #
 
-    # XXX
-    def refresh(self, refresh_devices: bool = True):
-        """ Refresh current group data (call refresh_groups on parent AirzoneCloud) """
-        self._api.refresh_groups()
-        if refresh_devices:
-            self.refresh_devices()
-
-    # XXX
-    def refresh_devices(self):
+    def refresh_devices(self) -> "Group":
         """ Refresh all devices of this group """
         self._load_devices()
+        return self
 
     #
     # private
@@ -104,13 +163,24 @@ class Group:
             for previous_device in previous_devices:
                 if previous_device.id == device_data.get("device_id"):
                     device = previous_device
+                    # update data
                     device._set_data_refreshed(device_data)
+                    # refresh states
+                    device.refresh()
                     break
             # device not found => instance new device
             if device is None:
                 device = Device(self._api, self, device_data)
             self._devices.append(device)
         return self._devices
+
+    def _set(self, param: str, value: Union[str, int, float, bool]) -> "Group":
+        """ Execute a command to the current device (power, mode, setpoint, ...) """
+        _LOGGER.debug("call _set({}, {}) on {}".format(param, value, self.str_verbose))
+        self._api._api_put_group(
+            self.id, self.group.installation.id, param, value, {"units": 0}
+        )
+        return self
 
     def _set_data_refreshed(self, data: dict) -> "Group":
         """ Set data refreshed (called by parent Installation on refresh_groups()) """

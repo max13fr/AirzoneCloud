@@ -27,7 +27,7 @@ def setup(app):
 ## Generate documentation
 
 ```bash
-(cd Sphinx-docs && make markdown && cp _build/markdown/AirzoneCloud.md API.md)
+(cd Sphinx-docs && make markdown && cp _build/markdown/AirzoneCloud.md ../API.md)
 ```
 
 ## Source

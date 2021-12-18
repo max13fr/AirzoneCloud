@@ -1,4 +1,5 @@
 import logging
+import time
 
 from . import AirzoneCloud
 from .Group import Group
@@ -65,6 +66,72 @@ class Installation:
         return self._data.get("ws_ids", [])
 
     #
+    # setters
+    #
+
+    def turn_on(
+        self, auto_refresh: bool = True, delay_refresh: int = 1
+    ) -> "Installation":
+        """ Turn on all devices in the installation """
+        _LOGGER.info("call turn_on() on {}".format(self.str_verbose))
+
+        for group in self.groups:
+            group.turn_on(auto_refresh=False)
+
+        if auto_refresh:
+            time.sleep(delay_refresh)  # wait data refresh by airzone
+            self.refresh()
+
+        return self
+
+    def turn_off(
+        self, auto_refresh: bool = True, delay_refresh: int = 1
+    ) -> "Installation":
+        """ Turn off all devices in the installation """
+        _LOGGER.info("call turn_off() on {}".format(self.str_verbose))
+
+        for group in self.groups:
+            group.turn_off(auto_refresh=False)
+
+        if auto_refresh:
+            time.sleep(delay_refresh)  # wait data refresh by airzone
+            self.refresh()
+
+        return self
+
+    def set_temperature(
+        self, temperature: float, auto_refresh: bool = True, delay_refresh: int = 1
+    ) -> "Installation":
+        """ Set target_temperature for current all devices in the installation (in degrees celsius) """
+        _LOGGER.info(
+            "call set_temperature({}) on {}".format(temperature, self.str_verbose)
+        )
+
+        for group in self.groups:
+            group.set_temperature(temperature=temperature, auto_refresh=False)
+
+        if auto_refresh:
+            time.sleep(delay_refresh)  # wait data refresh by airzone
+            self.refresh()
+
+        return self
+
+    def set_mode(
+        self, mode_name: str, auto_refresh: bool = True, delay_refresh: int = 1
+    ) -> "Installation":
+        """ Set mode of the all devices in the installation """
+        _LOGGER.info("call set_mode({}) on {}".format(mode_name, self.str_verbose))
+
+        for group in self.groups:
+            group.set_mode(mode_name=mode_name, auto_refresh=False)
+
+        if auto_refresh:
+            time.sleep(delay_refresh)  # wait data refresh by airzone
+            self.refresh()
+
+        return self
+
+    #
     # children
     #
 
@@ -86,17 +153,10 @@ class Installation:
     # Refresh
     #
 
-    # XXX
-    def refresh(self, refresh_groups: bool = True):
-        """ Refresh current installation data (call refresh_installations on parent AirzoneCloud) """
-        self._api.refresh_installations()
-        if refresh_groups:
-            self.refresh_groups()
-
-    # XXX
-    def refresh_groups(self):
+    def refresh_groups(self) -> "Installation":
         """ Refresh all groups of this installation """
         self._load_groups()
+        return self
 
     #
     # private

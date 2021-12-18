@@ -91,7 +91,9 @@ class AirzoneCloud:
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
             raise Exception(
-                "Unable to login to AirzoneCloud with email {}".format(self._email)
+                "Unable to login to AirzoneCloud with the email {} and the given password".format(
+                    self._email
+                )
             ) from None
 
         self._token = response.json().get("token")

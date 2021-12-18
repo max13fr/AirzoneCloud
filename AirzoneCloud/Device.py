@@ -120,7 +120,13 @@ class Device:
 
     @property
     def is_on(self) -> bool:
+        """ Return True if the device is on """
         return self._state.get("power", False)
+
+    @property
+    def is_master(self) -> bool:
+        """ Return True if the device is a master thermostat (allowed to update the mode of all devices) """
+        return len(self.modes_availables_ids) > 0
 
     @property
     def mode_id(self) -> int:
@@ -145,7 +151,7 @@ class Device:
     @property
     def modes_availables_ids(self) -> "list[int]":
         """ Return device availables modes list ([0┃1┃2┃3┃4┃5┃6┃7┃8┃9┃10┃11┃12, ...]) """
-        return self._state.get("mode_available", [0])
+        return self._state.get("mode_available", [])
 
     @property
     def modes_availables(self) -> "list[str]":
@@ -231,7 +237,7 @@ class Device:
     def set_temperature(
         self, temperature: float, auto_refresh: bool = True, delay_refresh: int = 1
     ) -> "Device":
-        """ Set target_temperature for current device in celcius """
+        """ Set target_temperature for current device (degrees celsius) """
         _LOGGER.info(
             "call set_temperature({}) on {}".format(temperature, self.str_verbose)
         )
@@ -250,7 +256,7 @@ class Device:
 
     def set_mode(
         self, mode_name: str, auto_refresh: bool = True, delay_refresh: int = 1
-    ):
+    ) -> "Device":
         """ Set mode of the device """
         _LOGGER.info("call set_mode({}) on {}".format(mode_name, self.str_verbose))
 
@@ -304,7 +310,7 @@ class Device:
     #
 
     def refresh(self) -> "Device":
-        """ Refresh current device data (call refresh_devices on parent AirzoneCloud) """
+        """ Refresh current device states """
         _LOGGER.debug("call refresh() on {}".format(self.str_verbose))
         self._state = self._api._api_get_device_state(
             self.id, self.group.installation.id
@@ -317,7 +323,7 @@ class Device:
     #
 
     def _set(self, param: str, value: Union[str, int, float, bool]) -> "Device":
-        """ Refresh current device data (call refresh_devices on parent AirzoneCloud) """
+        """ Execute a command to the current device (power, mode, setpoint, ...) """
         _LOGGER.debug("call _set({}, {}) on {}".format(param, value, self.str_verbose))
         self._api._api_patch_device(
             self.id, self.group.installation.id, param, value, {"units": 0}

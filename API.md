@@ -241,6 +241,10 @@ Return installation location id
 Return installation name
 
 
+#### refresh_devices()
+Refresh all devices of this installation
+
+
 #### refresh_groups()
 Refresh all groups of this installation
 

@@ -69,7 +69,7 @@ class Group:
 
         if auto_refresh:
             time.sleep(delay_refresh)  # wait data refresh by airzone
-            self.refresh()
+            self.refresh_devices()
 
         return self
 
@@ -82,7 +82,7 @@ class Group:
 
         if auto_refresh:
             time.sleep(delay_refresh)  # wait data refresh by airzone
-            self.refresh()
+            self.refresh_devices()
 
         return self
 
@@ -100,7 +100,7 @@ class Group:
 
         if auto_refresh:
             time.sleep(delay_refresh)  # wait data refresh by airzone
-            self.refresh()
+            self.refresh_devices()
 
         return self
 
@@ -116,7 +116,7 @@ class Group:
 
         if auto_refresh:
             time.sleep(delay_refresh)  # wait data refresh by airzone
-            self.refresh()
+            self.refresh_devices()
 
         return self
 
@@ -143,7 +143,8 @@ class Group:
 
     def refresh_devices(self) -> "Group":
         """ Refresh all devices of this group """
-        self._load_devices()
+        for device in self.devices:
+            device.refresh()
         return self
 
     #
@@ -165,8 +166,6 @@ class Group:
                     device = previous_device
                     # update data
                     device._set_data_refreshed(device_data)
-                    # refresh states
-                    device.refresh()
                     break
             # device not found => instance new device
             if device is None:

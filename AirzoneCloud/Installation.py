@@ -80,7 +80,7 @@ class Installation:
 
         if auto_refresh:
             time.sleep(delay_refresh)  # wait data refresh by airzone
-            self.refresh()
+            self.refresh_devices()
 
         return self
 
@@ -95,7 +95,7 @@ class Installation:
 
         if auto_refresh:
             time.sleep(delay_refresh)  # wait data refresh by airzone
-            self.refresh()
+            self.refresh_devices()
 
         return self
 
@@ -112,7 +112,7 @@ class Installation:
 
         if auto_refresh:
             time.sleep(delay_refresh)  # wait data refresh by airzone
-            self.refresh()
+            self.refresh_devices()
 
         return self
 
@@ -127,7 +127,7 @@ class Installation:
 
         if auto_refresh:
             time.sleep(delay_refresh)  # wait data refresh by airzone
-            self.refresh()
+            self.refresh_devices()
 
         return self
 
@@ -156,6 +156,12 @@ class Installation:
     def refresh_groups(self) -> "Installation":
         """ Refresh all groups of this installation """
         self._load_groups()
+        return self
+
+    def refresh_devices(self) -> "Installation":
+        """ Refresh all devices of this installation """
+        for group in self.groups:
+            group.refresh_devices()
         return self
 
     #

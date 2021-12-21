@@ -157,7 +157,7 @@ class Group:
         self._devices = []
         for device_data in self._data.get("devices", []):
             # skip fake system device
-            if device_data.get("type") == "az_system":
+            if device_data.get("type") != "az_zone":
                 continue
             device = None
             # search device in previous_devices (if where are refreshing devices)

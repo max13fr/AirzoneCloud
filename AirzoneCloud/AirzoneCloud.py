@@ -46,12 +46,12 @@ class AirzoneCloud:
 
     @property
     def installations(self) -> "list[Installation]":
-        """ Get installations list """
+        """Get installations list"""
         return self._installations
 
     @property
     def all_groups(self) -> "list[Group]":
-        """ Get all groups from all installations """
+        """Get all groups from all installations"""
         result = []
         for installation in self.installations:
             for group in installation.groups:
@@ -60,7 +60,7 @@ class AirzoneCloud:
 
     @property
     def all_devices(self) -> "list[Device]":
-        """ Get all devices from all installations """
+        """Get all devices from all installations"""
         result = []
         for group in self.installations:
             for device in group.all_devices:
@@ -136,13 +136,13 @@ class AirzoneCloud:
     #
 
     def _api_get_installations_list(self) -> list:
-        """ Http GET to load installations relations"""
+        """Http GET to load installations relations"""
         _LOGGER.debug("_api_get_installations_list()")
         # TODO manage pagination (10 installations max currently)
         return self._api_get("/installations").get("installations", [])
 
     def _api_get_installation_groups_list(self, installation_id: str) -> list:
-        """ Http GET to load groups in a specific installation """
+        """Http GET to load groups in a specific installation"""
         _LOGGER.debug(
             "_api_get_installation_groups_list(installation_id={})".format(
                 installation_id
@@ -153,7 +153,7 @@ class AirzoneCloud:
         )
 
     def _api_get_device_state(self, device_id: str, installation_id: str) -> dict:
-        """ Http GET to load state of a specific device """
+        """Http GET to load state of a specific device"""
         _LOGGER.debug(
             "_api_get_device_state(device_id={}, installation_id={})".format(
                 device_id, installation_id
@@ -167,7 +167,7 @@ class AirzoneCloud:
     def _api_get_device_config(
         self, device_id: str, installation_id: str, type: str = "all"
     ) -> dict:
-        """ Http GET to load config of a specific device """
+        """Http GET to load config of a specific device"""
         _LOGGER.debug(
             "_api_get_device_config(device_id={}, installation_id={}, type={})".format(
                 device_id, installation_id, type
@@ -186,7 +186,7 @@ class AirzoneCloud:
         value: Union[str, int, float, bool],
         opts: dict = {},
     ) -> Any:
-        """ Http PATCH to change a device parameter (state or config) """
+        """Http PATCH to change a device parameter (state or config)"""
         _LOGGER.debug(
             "_api_patch_device(device_id={}, installation_id={}, param={}, value={}, opts={})".format(
                 device_id, installation_id, param, value, opts

@@ -31,7 +31,7 @@ class Installation:
 
     @property
     def str_verbose(self) -> str:
-        """ More verbose description of current installation """
+        """More verbose description of current installation"""
         return "Installation(name={}, access_type={}, ws_ids=[{}], id={})".format(
             self.name, self.access_type, ", ".join(self.ws_ids), self.id
         )
@@ -42,27 +42,27 @@ class Installation:
 
     @property
     def id(self) -> str:
-        """ Return installation id """
+        """Return installation id"""
         return self._data.get("installation_id")
 
     @property
     def name(self) -> str:
-        """ Return installation name """
+        """Return installation name"""
         return self._data.get("name")
 
     @property
     def access_type(self) -> str:
-        """ Return installation access_type (admin┃advanced┃basic) """
+        """Return installation access_type (admin┃advanced┃basic)"""
         return self._data.get("access_type")
 
     @property
     def location_id(self) -> str:
-        """ Return installation location id """
+        """Return installation location id"""
         return self._data.get("location_id")
 
     @property
     def ws_ids(self) -> str:
-        """ Return array of Webserver MAC addresses belonging to the installation """
+        """Return array of Webserver MAC addresses belonging to the installation"""
         return self._data.get("ws_ids", [])
 
     #
@@ -72,7 +72,7 @@ class Installation:
     def turn_on(
         self, auto_refresh: bool = True, delay_refresh: int = 1
     ) -> "Installation":
-        """ Turn on all devices in the installation """
+        """Turn on all devices in the installation"""
         _LOGGER.info("call turn_on() on {}".format(self.str_verbose))
 
         for group in self.groups:
@@ -87,7 +87,7 @@ class Installation:
     def turn_off(
         self, auto_refresh: bool = True, delay_refresh: int = 1
     ) -> "Installation":
-        """ Turn off all devices in the installation """
+        """Turn off all devices in the installation"""
         _LOGGER.info("call turn_off() on {}".format(self.str_verbose))
 
         for group in self.groups:
@@ -102,7 +102,7 @@ class Installation:
     def set_temperature(
         self, temperature: float, auto_refresh: bool = True, delay_refresh: int = 1
     ) -> "Installation":
-        """ Set target_temperature for current all devices in the installation (in degrees celsius) """
+        """Set target_temperature for current all devices in the installation (in degrees celsius)"""
         _LOGGER.info(
             "call set_temperature({}) on {}".format(temperature, self.str_verbose)
         )
@@ -119,7 +119,7 @@ class Installation:
     def set_mode(
         self, mode_name: str, auto_refresh: bool = True, delay_refresh: int = 1
     ) -> "Installation":
-        """ Set mode of the all devices in the installation """
+        """Set mode of the all devices in the installation"""
         _LOGGER.info("call set_mode({}) on {}".format(mode_name, self.str_verbose))
 
         for group in self.groups:
@@ -137,12 +137,12 @@ class Installation:
 
     @property
     def groups(self) -> "list[Group]":
-        """ Get all groups in the current installation """
+        """Get all groups in the current installation"""
         return self._groups
 
     @property
     def all_devices(self) -> "list[Device]":
-        """ Get all devices from all groups in the current installation """
+        """Get all devices from all groups in the current installation"""
         result = []
         for group in self.groups:
             for device in group.devices:
@@ -154,12 +154,12 @@ class Installation:
     #
 
     def refresh_groups(self) -> "Installation":
-        """ Refresh all groups of this installation """
+        """Refresh all groups of this installation"""
         self._load_groups()
         return self
 
     def refresh_devices(self) -> "Installation":
-        """ Refresh all devices of this installation """
+        """Refresh all devices of this installation"""
         for group in self.groups:
             group.refresh_devices()
         return self
@@ -192,7 +192,7 @@ class Installation:
         return self._groups
 
     def _set_data_refreshed(self, data: dict) -> "Installation":
-        """ Set data refreshed (called by parent AirzoneCloud on refresh_installations()) """
+        """Set data refreshed (called by parent AirzoneCloud on refresh_installations())"""
         self._data = data
         _LOGGER.info("Data refreshed for {}".format(self.str_verbose))
         return self

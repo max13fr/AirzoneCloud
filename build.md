@@ -1,40 +1,18 @@
 # Generate API doc 
 
-## Prepare sphinx builder
+## Install packages
 
 ```bash
-sudo pip3 install sphinx sphinx-markdown-builder
+sudo pip3 install --upgrade 'pydoc-markdown>=4.0.0,<5.0.0' mkdocs
 ```
+
+## Regenerate API documentation
 
 ```bash
-sphinx-apidoc -o Sphinx-docs ./AirzoneCloud sphinx-apidoc --full -A 'max13fr'
+pydoc-markdown -I AirzoneCloud -m AirzoneCloud -m Installation -m Group -m Device --render-toc > API.md
 ```
 
-```bash
-echo "
-import os
-import sys
-sys.path.insert(0,os.path.abspath('../'))
-def skip(app, what, name, obj,would_skip, options):
-    if name in ( '__init__',):
-        return False
-    return would_skip
-def setup(app):
-    app.connect('autodoc-skip-member', skip)
- " >> Sphinx-docs/conf.py
-```
-
-## Generate documentation
-
-```bash
-(cd Sphinx-docs && make markdown && cp _build/markdown/AirzoneCloud.md ../API.md)
-```
-
-## Source
-
-https://stackoverflow.com/a/59128670
-
-# Build new version
+# Build new version and push to pypi
 
 - update version in setup.py
 - push new build on pypi

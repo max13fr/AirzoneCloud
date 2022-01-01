@@ -37,10 +37,28 @@ class Group:
 
     @property
     def str_verbose(self) -> str:
-        """ More verbose description of current group """
+        """More verbose description of current group"""
         return "Group(name={}, installation={}, id={})".format(
             self.name, self._installation.name, self.id
         )
+
+    @property
+    def all_properties(self) -> dict:
+        """Return all group properties values"""
+        result = {}
+        for prop in [
+            "id",
+            "name",
+            "is_on",
+            "mode_id",
+            "mode",
+            "mode_generic",
+            "mode_description",
+            "modes_availables",
+            "modes_availables_generics",
+        ]:
+            result[prop] = getattr(self, prop)
+        return result
 
     #
     # getters
@@ -48,20 +66,63 @@ class Group:
 
     @property
     def id(self) -> str:
-        """ Return group id """
+        """Return group id"""
         return self._data.get("group_id")
 
     @property
     def name(self) -> str:
-        """ Return group name """
+        """Return group name"""
         return self._data.get("name")
+
+    @property
+    def is_on(self) -> bool:
+        """Return True if at least one device is on in the group"""
+        for device in self.devices:
+            if device.is_on:
+                return True
+        return False
+
+    @property
+    def mode_id(self) -> int:
+        """Return group current id mode (0┃1┃2┃3┃4┃5┃6┃7┃8┃9┃10┃11┃12)"""
+        return self.master_device.mode_id
+
+    @property
+    def mode(self) -> str:
+        """Return group current mode name (stop | auto | cooling | heating | ventilation | dehumidify | emergency-heating | air-heating | radiant-heating | combined-heating | air-cooling | radiant-cooling | combined-cooling)"""
+        return self.master_device.mode
+
+    @property
+    def mode_generic(self) -> str:
+        """Return group current generic mode (stop | auto | cooling | heating | ventilation | dehumidify | emergency)"""
+        return self.master_device.mode_generic
+
+    @property
+    def mode_description(self) -> str:
+        """Return group current mode description (pretty name to display)"""
+        return self.master_device.mode_description
+
+    @property
+    def modes_availables_ids(self) -> "list[int]":
+        """Return group availables modes list ([0┃1┃2┃3┃4┃5┃6┃7┃8┃9┃10┃11┃12, ...])"""
+        return self.master_device.modes_availables_ids
+
+    @property
+    def modes_availables(self) -> "list[str]":
+        """Return group availables modes names list ([stop | auto | cooling | heating | ventilation | dehumidify | emergency-heating | air-heating | radiant-heating | combined-heating | air-cooling | radiant-cooling | combined-cooling, ...])"""
+        return self.master_device.modes_availables
+
+    @property
+    def modes_availables_generics(self) -> "list[str]":
+        """Return group availables modes generics list ([stop | auto | cooling | heating | ventilation | dehumidify | emergency, ...])"""
+        return self.master_device.modes_availables_generics
 
     #
     # setters
     #
 
     def turn_on(self, auto_refresh: bool = True, delay_refresh: int = 1) -> "Group":
-        """ Turn on all devices in the group """
+        """Turn on all devices in the group"""
         _LOGGER.info("call turn_on() on {}".format(self.str_verbose))
 
         for device in self.devices:
@@ -74,7 +135,7 @@ class Group:
         return self
 
     def turn_off(self, auto_refresh: bool = True, delay_refresh: int = 1) -> "Group":
-        """ Turn off all devices in the group """
+        """Turn off all devices in the group"""
         _LOGGER.info("call turn_off() on {}".format(self.str_verbose))
 
         for device in self.devices:
@@ -89,14 +150,13 @@ class Group:
     def set_temperature(
         self, temperature: float, auto_refresh: bool = True, delay_refresh: int = 1
     ) -> "Group":
-        """ Set target_temperature for current all devices in the group (in degrees celsius) """
+        """Set target_temperature for current all devices in the group (in degrees celsius)"""
         _LOGGER.info(
             "call set_temperature({}) on {}".format(temperature, self.str_verbose)
         )
 
         for device in self.devices:
-            if device.is_master:
-                device.set_temperature(temperature=temperature, auto_refresh=False)
+            device.set_temperature(temperature=temperature, auto_refresh=False)
 
         if auto_refresh:
             time.sleep(delay_refresh)  # wait data refresh by airzone
@@ -107,16 +167,12 @@ class Group:
     def set_mode(
         self, mode_name: str, auto_refresh: bool = True, delay_refresh: int = 1
     ) -> "Group":
-        """ Set mode of the all devices in the group """
+        """Set mode of the all devices in the group"""
         _LOGGER.info("call set_mode({}) on {}".format(mode_name, self.str_verbose))
 
-        for device in self.devices:
-            if device.is_master:
-                device.set_mode(mode_name=mode_name, auto_refresh=False)
-
-        if auto_refresh:
-            time.sleep(delay_refresh)  # wait data refresh by airzone
-            self.refresh_devices()
+        self.master_device.set_mode(
+            mode_name=mode_name, auto_refresh=auto_refresh, delay_refresh=delay_refresh
+        )
 
         return self
 
@@ -126,7 +182,7 @@ class Group:
 
     @property
     def installation(self) -> Installation:
-        """ Get parent installation """
+        """Get parent installation"""
         return self._installation
 
     #
@@ -135,14 +191,25 @@ class Group:
 
     @property
     def devices(self) -> "list[Device]":
+        """Return all devices in this group"""
         return self._devices
+
+    @property
+    def master_device(self) -> "Device":
+        """Return master device in this group (only device allowed to change mode)"""
+        for device in self.devices:
+            if device.is_master:
+                return device
+        raise Exception(
+            "Cannot find master device in group {}".format(self.str_verbose)
+        )
 
     #
     # Refresh
     #
 
     def refresh_devices(self) -> "Group":
-        """ Refresh all devices of this group """
+        """Refresh all devices of this group"""
         for device in self.devices:
             device.refresh()
         return self
@@ -174,7 +241,7 @@ class Group:
         return self._devices
 
     def _set(self, param: str, value: Union[str, int, float, bool]) -> "Group":
-        """ Execute a command to the current device (power, mode, setpoint, ...) """
+        """Execute a command to the current device (power, mode, setpoint, ...)"""
         _LOGGER.debug("call _set({}, {}) on {}".format(param, value, self.str_verbose))
         self._api._api_put_group(
             self.id, self.group.installation.id, param, value, {"units": 0}
@@ -182,7 +249,7 @@ class Group:
         return self
 
     def _set_data_refreshed(self, data: dict) -> "Group":
-        """ Set data refreshed (called by parent Installation on refresh_groups()) """
+        """Set data refreshed (called by parent Installation on refresh_groups())"""
         self._data = data
         _LOGGER.info("Data refreshed for {}".format(self.str_verbose))
         return self

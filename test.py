@@ -30,7 +30,11 @@ if config.get("refresh_before_display", False):
 for installation in api.installations:
     print(installation.str_verbose)
     for group in installation.groups:
-        print("   " + group.str_verbose)
+        print("   {}".format(group.str_verbose))
+        if config.get("display_group_properties", False):
+            for key, val in group.all_properties.items():
+                print("     - {} = {}".format(key, val))
+
         for device in group.devices:
             print("     " + device.str_verbose)
             if config.get("display_device_properties", False):

@@ -265,6 +265,7 @@ Device(name=Salon, is_connected=True, is_on=True, mode=cooling, current_temp=20.
 - **email** : used to log-in to you AirzoneCloud account (default to *changeme@example.com*)
 - **password** : used to log-in to you AirzoneCloud account (default to *changeme*)
 - **log_level** : minimum level of log to display : DEBUG | INFO | WARNING | ERROR | CRITICIAL (default to *INFO*)
+- **display_group_properties** : display all properties for each group (default to *true*).
 - **display_device_properties** : display all properties for each device (default to *true*).
 - **display_api_token** : ask to display token used to connect to the AirzoneCloud API (default to *false*). Useful for https://developers.airzonecloud.com/docs/web-api/
 - **refresh_before_display** : ask to call all refresh functions before displaying for test purpose (default to *false*).

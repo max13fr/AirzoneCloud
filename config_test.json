@@ -2,6 +2,7 @@
     "email": "changeme@example.com",
     "password": "changeme",
     "log_level": "INFO",
+    "display_group_properties": true,
     "display_device_properties": true,
     "display_api_token": false,
     "refresh_before_display": false

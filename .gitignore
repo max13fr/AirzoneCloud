@@ -5,4 +5,3 @@ __pycache__/
 dist/
 Sphinx-docs
 config_test.json
-TODROP.py

@@ -8,7 +8,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class Device:
-    """ Manage a AirzoneCloud device (thermostat) """
+    """Manage a AirzoneCloud device (thermostat)"""
 
     _api: "AirzoneCloud" = None
     _group: "Group" = None
@@ -39,7 +39,7 @@ class Device:
 
     @property
     def str_verbose(self) -> str:
-        """ More verbose description of current device """
+        """More verbose description of current device"""
         return "Device(name={}, is_connected={}, is_on={}, mode={}, current_temp={}, target_temp={}, id={}, ws_id={})".format(
             self.name,
             self.is_connected,
@@ -53,6 +53,7 @@ class Device:
 
     @property
     def all_properties(self) -> dict:
+        """Return all group properties values"""
         result = {}
         for prop in [
             "id",
@@ -85,77 +86,77 @@ class Device:
 
     @property
     def id(self) -> str:
-        """ Return device id """
+        """Return device id"""
         return self._data.get("device_id")
 
     @property
     def name(self) -> str:
-        """ Return device name """
+        """Return device name"""
         return self._data.get("name")
 
     @property
     def type(self) -> str:
-        """ Return device type (az_zone┃aidoo) """
+        """Return device type (az_zone┃aidoo)"""
         return self._data.get("type")
 
     @property
     def ws_id(self) -> str:
-        """ Return device webserver id (mac address) """
+        """Return device webserver id (mac address)"""
         return self._data.get("ws_id")
 
     @property
     def system_number(self) -> str:
-        """ Return device system_number """
+        """Return device system_number"""
         return self._data.get("meta", {}).get("system_number")
 
     @property
     def zone_number(self) -> str:
-        """ Return device zone_number """
+        """Return device zone_number"""
         return self._data.get("meta", {}).get("zone_number")
 
     @property
     def is_connected(self) -> bool:
-        """ Return if the device is online (True) or offline (False) """
+        """Return if the device is online (True) or offline (False)"""
         return self._state.get("isConnected", False)
 
     @property
     def is_on(self) -> bool:
-        """ Return True if the device is on """
+        """Return True if the device is on"""
         return self._state.get("power", False)
 
     @property
     def is_master(self) -> bool:
-        """ Return True if the device is a master thermostat (allowed to update the mode of all devices) """
+        """Return True if the device is a master thermostat (allowed to update the mode of all devices)"""
         return len(self.modes_availables_ids) > 0
 
     @property
     def mode_id(self) -> int:
-        """ Return device current id mode (0┃1┃2┃3┃4┃5┃6┃7┃8┃9┃10┃11┃12) """
+        """Return device current id mode (0┃1┃2┃3┃4┃5┃6┃7┃8┃9┃10┃11┃12)"""
         return self._state.get("mode", 0)
 
     @property
     def mode(self) -> str:
-        """ Return device current mode name (stop | auto | cooling | heating | ventilation | dehumidify | emergency-heating | air-heating | radiant-heating | combined-heating | air-cooling | radiant-cooling | combined-cooling)"""
+        """Return device current mode name (stop | auto | cooling | heating | ventilation | dehumidify | emergency-heating | air-heating | radiant-heating | combined-heating | air-cooling | radiant-cooling | combined-cooling)"""
         return MODES_CONVERTER.get(str(self.mode_id), {}).get("name")
 
     @property
     def mode_generic(self) -> str:
-        """ Return device current generic mode (stop | auto | cooling | heating | ventilation | dehumidify | emergency) """
+        """Return device current generic mode (stop | auto | cooling | heating | ventilation | dehumidify | emergency)"""
         return MODES_CONVERTER.get(str(self.mode_id), {}).get("generic")
 
     @property
     def mode_description(self) -> str:
-        """ Return device current mode description (pretty name to display)"""
+        """Return device current mode description (pretty name to display)"""
         return MODES_CONVERTER.get(str(self.mode_id), {}).get("description")
 
     @property
     def modes_availables_ids(self) -> "list[int]":
-        """ Return device availables modes list ([0┃1┃2┃3┃4┃5┃6┃7┃8┃9┃10┃11┃12, ...]) """
+        """Return device availables modes list ([0┃1┃2┃3┃4┃5┃6┃7┃8┃9┃10┃11┃12, ...])"""
         return self._state.get("mode_available", [])
 
     @property
     def modes_availables(self) -> "list[str]":
-        """ Return device availables modes names list ([stop | auto | cooling | heating | ventilation | dehumidify | emergency-heating | air-heating | radiant-heating | combined-heating | air-cooling | radiant-cooling | combined-cooling, ...])"""
+        """Return device availables modes names list ([stop | auto | cooling | heating | ventilation | dehumidify | emergency-heating | air-heating | radiant-heating | combined-heating | air-cooling | radiant-cooling | combined-cooling, ...])"""
         return [
             MODES_CONVERTER.get(str(mode_id), {}).get("name")
             for mode_id in self.modes_availables_ids
@@ -163,7 +164,7 @@ class Device:
 
     @property
     def modes_availables_generics(self) -> "list[str]":
-        """ Return device availables modes generics list ([stop | auto | cooling | heating | ventilation | dehumidify | emergency, ...])"""
+        """Return device availables modes generics list ([stop | auto | cooling | heating | ventilation | dehumidify | emergency, ...])"""
         return list(
             set(
                 [
@@ -175,35 +176,35 @@ class Device:
 
     @property
     def current_temperature(self) -> float:
-        """ Return device current temperature in °C """
+        """Return device current temperature in °C"""
         return float(self._state.get("local_temp", {}).get("celsius", 0))
 
     @property
     def current_humidity(self) -> int:
-        """ Return device current humidity in percentage (0-100) """
+        """Return device current humidity in percentage (0-100)"""
         return int(self._state.get("humidity", 0))
 
     @property
     def target_temperature(self) -> float:
-        """ Return device target temperature for current mode """
+        """Return device target temperature for current mode"""
         key = MODES_CONVERTER.get(str(self.mode_id), {}).get("setpoint_key")
         return float(self._state.get(key, {}).get("celsius", 0))
 
     @property
     def min_temperature(self) -> float:
-        """ Return device minimal temperature for current mode """
+        """Return device minimal temperature for current mode"""
         key = MODES_CONVERTER.get(str(self.mode_id), {}).get("range_key_prefix") + "min"
         return float(self._state.get(key, {}).get("celsius", 0))
 
     @property
     def max_temperature(self) -> float:
-        """ Return device maximal temperature for current mode """
+        """Return device maximal temperature for current mode"""
         key = MODES_CONVERTER.get(str(self.mode_id), {}).get("range_key_prefix") + "max"
         return float(self._state.get(key, {}).get("celsius", 0))
 
     @property
     def step_temperature(self) -> float:
-        """ Return device step temperature (minimum increase/decrease step) """
+        """Return device step temperature (minimum increase/decrease step)"""
         return float(self._state.get("step", {}).get("celsius", 0.5))
 
     #
@@ -211,7 +212,7 @@ class Device:
     #
 
     def turn_on(self, auto_refresh: bool = True, delay_refresh: int = 1) -> "Device":
-        """ Turn device on """
+        """Turn device on"""
         _LOGGER.info("call turn_on() on {}".format(self.str_verbose))
 
         self._set("power", True)
@@ -223,7 +224,7 @@ class Device:
         return self
 
     def turn_off(self, auto_refresh: bool = True, delay_refresh: int = 1) -> "Device":
-        """ Turn device off """
+        """Turn device off"""
         _LOGGER.info("call turn_off() on {}".format(self.str_verbose))
 
         self._set("power", False)
@@ -237,7 +238,7 @@ class Device:
     def set_temperature(
         self, temperature: float, auto_refresh: bool = True, delay_refresh: int = 1
     ) -> "Device":
-        """ Set target_temperature for current device (degrees celsius) """
+        """Set target_temperature for current device (degrees celsius)"""
         _LOGGER.info(
             "call set_temperature({}) on {}".format(temperature, self.str_verbose)
         )
@@ -257,7 +258,7 @@ class Device:
     def set_mode(
         self, mode_name: str, auto_refresh: bool = True, delay_refresh: int = 1
     ) -> "Device":
-        """ Set mode of the device """
+        """Set mode of the device"""
         _LOGGER.info("call set_mode({}) on {}".format(mode_name, self.str_verbose))
 
         # search mode id
@@ -302,7 +303,7 @@ class Device:
 
     @property
     def group(self) -> Group:
-        """ Get parent group """
+        """Get parent group"""
         return self._group
 
     #
@@ -310,7 +311,7 @@ class Device:
     #
 
     def refresh(self) -> "Device":
-        """ Refresh current device states """
+        """Refresh current device states"""
         _LOGGER.debug("call refresh() on {}".format(self.str_verbose))
         self._state = self._api._api_get_device_state(
             self.id, self.group.installation.id
@@ -323,7 +324,7 @@ class Device:
     #
 
     def _set(self, param: str, value: Union[str, int, float, bool]) -> "Device":
-        """ Execute a command to the current device (power, mode, setpoint, ...) """
+        """Execute a command to the current device (power, mode, setpoint, ...)"""
         _LOGGER.debug("call _set({}, {}) on {}".format(param, value, self.str_verbose))
         self._api._api_patch_device(
             self.id, self.group.installation.id, param, value, {"units": 0}
@@ -331,7 +332,7 @@ class Device:
         return self
 
     def _set_data_refreshed(self, data: dict) -> "Device":
-        """ Set data refreshed (called by parent AirzoneCloud on refresh_devices()) """
+        """Set data refreshed (called by parent AirzoneCloud on refresh_devices())"""
         self._data = data
         _LOGGER.info("Data refreshed for {}".format(self.str_verbose))
         return self

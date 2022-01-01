@@ -170,9 +170,11 @@ class Group:
         """Set mode of the all devices in the group"""
         _LOGGER.info("call set_mode({}) on {}".format(mode_name, self.str_verbose))
 
-        self.master_device.set_mode(
-            mode_name=mode_name, auto_refresh=auto_refresh, delay_refresh=delay_refresh
-        )
+        self.master_device.set_mode(mode_name=mode_name, auto_refresh=False)
+
+        if auto_refresh:
+            time.sleep(delay_refresh)  # wait data refresh by airzone
+            self.refresh_devices()
 
         return self
 
